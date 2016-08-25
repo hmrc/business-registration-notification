@@ -24,15 +24,19 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class PingSpec extends UnitSpec with WithFakeApplication{
 
-  val fakeRequest = FakeRequest("GET", "/ping/noauth")
-
-
   "GET /ping/noauth" should {
+    val fakeRequest = FakeRequest("GET", "/ping/noauth")
     "return 200" in {
       val result = Ping.noAuth()(fakeRequest)
       status(result) shouldBe Status.OK
     }
   }
 
-
+  "GET /ping/proxy" should {
+    val fakeRequest = FakeRequest("GET", "/ping/proxy")
+    "return 200" in {
+      val result = Ping.proxy()(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
 }

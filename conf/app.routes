@@ -2,3 +2,4 @@
 
 GET        /hello-world             uk.gov.hmrc.businessregistrationnotification.controllers.MicroserviceHelloWorld.hello
 GET        /ping/noauth             uk.gov.hmrc.businessregistrationnotification.controllers.Ping.noAuth
+GET        /ping/proxy              uk.gov.hmrc.businessregistrationnotification.controllers.Ping.proxy

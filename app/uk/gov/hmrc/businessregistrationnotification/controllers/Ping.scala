@@ -19,13 +19,41 @@ package uk.gov.hmrc.businessregistrationnotification.controllers
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
+import uk.gov.hmrc.businessregistrationnotification.WSHttp
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
+import play.api.Logger
+
 import scala.concurrent.Future
 
-object Ping extends Ping
+object Ping extends Ping with ServicesConfig {
+	val rootUrl = baseUrl("business-registration-frontend")
+	val http = WSHttp
+}
 
 trait Ping extends BaseController {
+
+	val rootUrl: String
+	val http: HttpGet
 
 	def noAuth() = Action.async { implicit request =>
 		Future.successful(Ok(""))
 	}
+
+	def proxy() = Action.async { implicit request =>
+
+		def proxyToBR()(implicit rds: HttpReads[HttpResponse], hc: HeaderCarrier) = {
+
+			val url = s"${rootUrl}/register-your-business/welcome"
+			http.GET[HttpResponse](url)(rds, hc.withExtraHeaders("notification" -> "true"))
+		}
+
+		Logger.info("About to call proxy service")
+		proxyToBR().map( x =>
+			Logger.info(s"Called proxy service and got status ${x.status}")
+		)
+
+		Future.successful(Ok(""))
+	}
+
 }
