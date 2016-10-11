@@ -27,32 +27,14 @@ import play.api.Logger
 import scala.concurrent.Future
 
 object Ping extends Ping with ServicesConfig {
-	val rootUrl = baseUrl("business-registration-frontend")
 	val http = WSHttp
 }
 
 trait Ping extends BaseController {
 
-	val rootUrl: String
 	val http: HttpGet
 
 	def noAuth() = Action.async { implicit request =>
-		Future.successful(Ok(""))
-	}
-
-	def proxy() = Action.async { implicit request =>
-
-		def proxyToBR()(implicit rds: HttpReads[HttpResponse], hc: HeaderCarrier) = {
-
-			val url = s"${rootUrl}/register-your-business/welcome"
-			http.GET[HttpResponse](url)(rds, hc.withExtraHeaders("notification" -> "true"))
-		}
-
-		Logger.info("About to call proxy service")
-		proxyToBR().map( x =>
-			Logger.info(s"Called proxy service and got status ${x.status}")
-		)
-
 		Future.successful(Ok(""))
 	}
 

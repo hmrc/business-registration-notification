@@ -32,11 +32,4 @@ class PingSpec extends UnitSpec with WithFakeApplication{
     }
   }
 
-  "GET /ping/proxy" should {
-    val fakeRequest = FakeRequest("GET", "/ping/proxy")
-    "return 200" in {
-      val result = Ping.proxy()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-  }
 }
