@@ -14,28 +14,38 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.businessregistrationnotification.controllers
+package controllers
 
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
+import config.WSHttp
+import play.api.Play.current
 import play.api.mvc._
-import uk.gov.hmrc.businessregistrationnotification.WSHttp
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
-import play.api.Logger
+import uk.gov.hmrc.play.http.HttpGet
+import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
 
 object Ping extends Ping with ServicesConfig {
 	val http = WSHttp
+	val authAction = {
+		val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
+		new BasicAuthenticatedAction(basicAuthFilterConfig)
+	}
+
 }
 
 trait Ping extends BaseController {
 
 	val http: HttpGet
+	val authAction: ActionBuilder[Request]
 
 	def noAuth() = Action.async { implicit request =>
 		Future.successful(Ok(""))
+	}
+
+	def auth() = authAction {
+		Ok("")
 	}
 
 }

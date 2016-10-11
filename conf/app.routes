@@ -1,4 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.businessregistrationnotification.controllers.MicroserviceHelloWorld.hello
-GET        /ping/noauth             uk.gov.hmrc.businessregistrationnotification.controllers.Ping.noAuth
+GET        /ping/noauth             controllers.Ping.noAuth
+GET        /ping                    controllers.Ping.auth
