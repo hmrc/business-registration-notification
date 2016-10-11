@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.businessregistrationnotification.controllers
+package util
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.play.test.WithFakeApplication
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-
-
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
-
-  val fakeRequest = FakeRequest("GET", "/")
-
-
-  "GET /" should {
-    "return 200" in {
-      val result = MicroserviceHelloWorld.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
+object Divider {
+  implicit class IDivider(s: String) {
+    def divide(c: Char): List[String] = Divider.divide(s, c)
+    def divideLast(c: Char): List[String] = Divider.divideLast(s, c)
   }
 
+  /** Divides at the first instance of c */
+  def divide(s: String, c: Char): List[String] = divide(s, s.indexOf(c))
 
+  /** Divides at the last instance of c */
+  def divideLast(s: String, c: Char): List[String] = divide(s, s.lastIndexOf(c))
+
+  private def divide(s: String, i: Int) = {
+    i match {
+      case i if i >= 0 => List(s.substring(0, i), s.substring(i + 1))
+      case _ => List(s)
+    }
+
+  }
 }
