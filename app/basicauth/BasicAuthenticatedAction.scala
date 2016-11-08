@@ -21,6 +21,7 @@ import play.api.Mode.Mode
 import play.api.http.HeaderNames.{AUTHORIZATION, WWW_AUTHENTICATE}
 import play.api.mvc.{Result, _}
 import config.ConfigHelper._
+import uk.gov.hmrc.play.config.RunMode
 
 import scala.concurrent.Future
 
@@ -62,7 +63,7 @@ case class BasicAuthenticationFilterConfiguration(realm: String, enabled: Boolea
   }
 }
 
-object BasicAuthenticationFilterConfiguration {
+object BasicAuthenticationFilterConfiguration extends RunMode {
   /* Required in app-config - the password MUST be encrypted by WebOps
     basicAuthentication.enabled: true
     basicAuthentication.realm: 'Production'
