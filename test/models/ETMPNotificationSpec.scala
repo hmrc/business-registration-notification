@@ -27,11 +27,12 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
   def jsonLine(key: String, value: String, comma: Boolean): String = s""""${key}" : "${value}"${lineEnd(comma)}"""
   def jsonLine(key: String, value: Option[String], comma: Boolean = true): String = value.fold("")(v=>s""""${key}" : "${v}"${lineEnd(comma)}""")
 
-  def j(utr: Option[String] = Some("123456789"), status: String = "04") = {
+  val defaultModel = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", Some("123456789"), "04")
+  def j(utr: Option[String] = defaultModel.taxId, status: String = defaultModel.status, regime: String = defaultModel.regime) = {
     s"""
        |{
-       |  "timestamp": "2001-12-31T12:00:00Z",
-       |  "regime": "corporation-tax",
+       |  "timestamp": "${defaultModel.timestamp}",
+       |  "regime": "${regime}",
        |  ${jsonLine("business-tax-identifier", utr)}
        |  "status": "${status}"
        |}
@@ -41,9 +42,8 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
   "ETMPNotification Model - utr" should {
     "Be able to be parsed with valid UTR" in {
       val utr = Some("123456789012345")
-      val status = "04"
-      val json = j(utr = utr, status = status)
-      val expected = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", utr, status)
+      val json = j(utr = utr)
+      val expected = defaultModel.copy(taxId = utr)
 
       val result = Json.parse(json).validate[ETMPNotification]
 
@@ -51,9 +51,8 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
     }
 
     "Be able to be parsed without UTR" in {
-      val status = "04"
-      val json = j(utr = None, status = status)
-      val expected = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", None, status)
+      val json = j(utr = None)
+      val expected = defaultModel.copy(taxId = None)
 
       val result = Json.parse(json).validate[ETMPNotification]
 
@@ -76,4 +75,24 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
       shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(ValidationError("error.maxLength", 15)))
     }
   }
+
+  "ETMPNotification Model - regime" should {
+    "Be able to be parsed with valid regime" in {
+      val json = j()
+      val expected = defaultModel
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldBeSuccess(expected, result)
+    }
+
+    "fail to be read from JSON if the regime is wrong" in {
+      val json = j(regime = "123456789012345")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldHaveErrors(result, JsPath() \ "regime", Seq(ValidationError("error.pattern")))
+    }
+  }
+
 }
