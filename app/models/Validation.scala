@@ -33,6 +33,7 @@ trait NotificationValidator {
   import Validation.lengthFmt
 
   val taxIdentifierValidator = lengthFmt(15)
-  val statusValidator = lengthFmt(2, 2)
-  val regimeValidator = lengthFmt(15, 15)
+  val statusValidator = pattern("^04|05|06|07|08|09|10$".r)
+  val regimeValidator = pattern("^corporation-tax$".r)
+  val isoDateValidator = pattern("^\\d{4}(-\\d\\d(-\\d\\d(T\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?(([+-]\\d\\d:\\d\\d)|Z)?)?)?)?$".r)
 }

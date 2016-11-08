@@ -27,11 +27,12 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
   def jsonLine(key: String, value: String, comma: Boolean): String = s""""${key}" : "${value}"${lineEnd(comma)}"""
   def jsonLine(key: String, value: Option[String], comma: Boolean = true): String = value.fold("")(v=>s""""${key}" : "${v}"${lineEnd(comma)}""")
 
-  def j(utr: Option[String] = Some("123456789"), status: String = "04") = {
+  val defaultModel = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", Some("123456789"), "04")
+  def j(utr: Option[String] = defaultModel.taxId, status: String = defaultModel.status, regime: String = defaultModel.regime, timestamp : String = defaultModel.timestamp) = {
     s"""
        |{
-       |  "timestamp": "2001-12-31T12:00:00Z",
-       |  "regime": "corporation-tax",
+       |  "timestamp": "${timestamp}",
+       |  "regime": "${regime}",
        |  ${jsonLine("business-tax-identifier", utr)}
        |  "status": "${status}"
        |}
@@ -41,9 +42,8 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
   "ETMPNotification Model - utr" should {
     "Be able to be parsed with valid UTR" in {
       val utr = Some("123456789012345")
-      val status = "04"
-      val json = j(utr = utr, status = status)
-      val expected = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", utr, status)
+      val json = j(utr = utr)
+      val expected = defaultModel.copy(taxId = utr)
 
       val result = Json.parse(json).validate[ETMPNotification]
 
@@ -51,9 +51,8 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
     }
 
     "Be able to be parsed without UTR" in {
-      val status = "04"
-      val json = j(utr = None, status = status)
-      val expected = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", None, status)
+      val json = j(utr = None)
+      val expected = defaultModel.copy(taxId = None)
 
       val result = Json.parse(json).validate[ETMPNotification]
 
@@ -80,7 +79,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
   "ETMPNotification model - status" should {
     "be able to be parsed with a valid status" in {
       val json = j(status = "04")
-      val expected = ETMPNotification("2001-12-31T12:00:00Z","corporation-tax",Some("123456789"),"04")
+      val expected = defaultModel.copy(status = "04")
 
       val result = Json.parse(json).validate[ETMPNotification]
 
@@ -88,12 +87,22 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
     }
 
     "fail validation" when {
+
+      "parsed with a dodgy status" in {
+        val json = j(status = "xx")
+        val expected = defaultModel.copy(status = "xx")
+
+        val result = Json.parse(json).validate[ETMPNotification]
+
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
+      }
+
       "no status is given" in {
         val json = j(status = "")
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.minLength", 2)))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
       }
 
       "a single char status is given for status" in {
@@ -101,7 +110,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.minLength", 2)))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
       }
 
       "more than two chars are given for status" in {
@@ -109,8 +118,99 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.maxLength", 2)))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
       }
+    }
+  }
+
+  "ETMPNotification Model - regime" should {
+    "Be able to be parsed with valid regime" in {
+      val json = j()
+      val expected = defaultModel
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldBeSuccess(expected, result)
+    }
+
+    "fail to be read from JSON if the regime is wrong" in {
+      val json = j(regime = "123456789012345")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldHaveErrors(result, JsPath() \ "regime", Seq(ValidationError("error.pattern")))
+    }
+  }
+
+  "ETMPNotification model - timestamp" should {
+    "match the pattern" in {
+      val json = j(timestamp = "2001-12-31T12:00:00Z")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+      val expected = defaultModel.copy(timestamp = "2001-12-31T12:00:00Z")
+
+      shouldBeSuccess(expected, result)
+    }
+
+    "match the pattern with + hours" in {
+      val json = j(timestamp = "2001-12-31T12:00:00+13:00")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+      val expected = defaultModel.copy(timestamp = "2001-12-31T12:00:00+13:00")
+
+      shouldBeSuccess(expected, result)
+    }
+
+    "match the pattern with - hours" in {
+      val json = j(timestamp = "2001-12-31T12:00:00-13:00")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+      val expected = defaultModel.copy(timestamp = "2001-12-31T12:00:00-13:00")
+
+      shouldBeSuccess(expected, result)
+    }
+
+    "match the pattern with no Z" in {
+      val json = j(timestamp = "2001-12-31T12:00:00")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+      val expected = defaultModel.copy(timestamp = "2001-12-31T12:00:00")
+
+      shouldBeSuccess(expected, result)
+    }
+  }
+
+  "fail validation" when {
+    "given 2007-04-0524:50" in {
+      val json = j(timestamp = "2007-04-0524:50")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+    }
+
+    "given 2001-12-31T12:00.00" in {
+      val json = j(timestamp = "2001-12-31T12:00.00")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+    }
+
+    "given 2001:12:31T12:00:00" in {
+      val json = j(timestamp = "2001:12:31T12:00:00")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+    }
+
+    "given 2001-12-31T12-00-00" in {
+      val json = j(timestamp = "2001-12-31T12-00-00")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
     }
   }
 }

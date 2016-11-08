@@ -41,7 +41,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
   implicit val hc = new HeaderCarrier()
 
   val data = ETMPNotification(
-    "testTimeStamp",
+    "2001-12-31T12:00:00Z",
     "corporation-tax",
     Some("testUTRRRRRRRRRRRRRRRRRRRRRR"),
     "04"
@@ -87,9 +87,9 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     "return an OK" when {
       "a record has been successfully updated" in new Setup {
 
-        val request = FakeRequest().withBody(Json.toJson(data.copy(taxId = Some("AAAAAAAAAAAAA"))))
+        val request = FakeRequest().withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
-        when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("AAAAAAAAAAAAA"))))(Matchers.any()))
+        when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
           .thenReturn(Future.successful(OK))
 
         val result = await(TestController.processNotification("testAckRef")(request))

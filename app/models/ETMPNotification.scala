@@ -26,7 +26,7 @@ case class ETMPNotification(timestamp : String,
 
 object ETMPNotification extends NotificationValidator {
   implicit val format = (
-    (__ \ "timestamp").format[String] and
+    (__ \ "timestamp").format[String](isoDateValidator) and
     (__ \ "regime").format[String](regimeValidator) and
     (__ \ "business-tax-identifier").formatNullable[String](taxIdentifierValidator) and
     (__ \ "status").format[String](statusValidator)
