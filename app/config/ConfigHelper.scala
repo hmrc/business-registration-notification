@@ -87,7 +87,8 @@ object ConfigHelper {
   }
 
   def replaceHome(string: String): String = {
-    if (string.startsWith("$HOME")) System.getenv("HOME") + string.substring(5)
-    else string
+    val homePrefix = "$HOME"
+    if (string.startsWith(homePrefix)) { System.getenv("HOME") + string.substring(homePrefix.length) }
+    else { string }
   }
 }
