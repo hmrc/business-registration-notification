@@ -28,7 +28,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.HeaderCarrier
 import util.ServiceDirector
-import play.api.test.Helpers.OK
+import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
@@ -41,10 +41,10 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
   implicit val hc = new HeaderCarrier()
 
   val data = ETMPNotification(
-    "testTimeStamp",
+    "2001-12-31T12:00:00Z",
     "corporation-tax",
-    Some("testUTR"),
-    "testStatus"
+    Some("testUTRRRRRRRRRRRRRRRRRRRRRR"),
+    "04"
   )
 
   class Setup {
@@ -60,12 +60,36 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
   }
 
   "processNotification" should {
-    "return an OK" when {
-      "a record has been successfully updated" in new Setup {
+    "return an BADREQUEST" when {
+      "the UTR is too long" in new Setup {
 
         val request = FakeRequest().withBody(Json.toJson(data))
 
         when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data))(Matchers.any()))
+          .thenReturn(Future.successful(OK))
+
+        val result = await(TestController.processNotification("testAckRef")(request))
+        status(result) shouldBe BAD_REQUEST
+      }
+
+      "the UTR isnt present" in new Setup {
+
+        val request = FakeRequest().withBody(Json.toJson(data.copy(taxId = Some(""))))
+
+        when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some(""))))(Matchers.any()))
+          .thenReturn(Future.successful(OK))
+
+        val result = await(TestController.processNotification("testAckRef")(request))
+        status(result) shouldBe BAD_REQUEST
+      }
+    }
+
+    "return an OK" when {
+      "a record has been successfully updated" in new Setup {
+
+        val request = FakeRequest().withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+
+        when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
           .thenReturn(Future.successful(OK))
 
         val result = await(TestController.processNotification("testAckRef")(request))
