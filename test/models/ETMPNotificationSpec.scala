@@ -76,4 +76,41 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
       shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(ValidationError("error.maxLength", 15)))
     }
   }
+
+  "ETMPNotification model - status" should {
+    "be able to be parsed with a valid status" in {
+      val json = j(status = "04")
+      val expected = ETMPNotification("2001-12-31T12:00:00Z","corporation-tax",Some("123456789"),"04")
+
+      val result = Json.parse(json).validate[ETMPNotification]
+
+      shouldBeSuccess(expected, result)
+    }
+
+    "fail validation" when {
+      "no status is given" in {
+        val json = j(status = "")
+
+        val result = Json.parse(json).validate[ETMPNotification]
+
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.minLength", 2)))
+      }
+
+      "a single char status is given for status" in {
+        val json = j(status = "0")
+
+        val result = Json.parse(json).validate[ETMPNotification]
+
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.minLength", 2)))
+      }
+
+      "more than two chars are given for status" in {
+        val json = j(status = "001")
+
+        val result = Json.parse(json).validate[ETMPNotification]
+
+        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.maxLength", 2)))
+      }
+    }
+  }
 }
