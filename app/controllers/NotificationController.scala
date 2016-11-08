@@ -16,10 +16,13 @@
 
 package controllers
 
+import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import models.ETMPNotification
-import play.api.libs.json.JsValue
-import play.api.mvc.{Action, AnyContent}
-import services.CompanyRegistrationService
+import play.api.Logger
+import play.api.Play._
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Action
+import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import util.ServiceDirector
 
@@ -33,12 +36,47 @@ trait NotificationController extends BaseController {
 
   val director : ServiceDirector
 
-  def processNotification(ackRef : String) : Action[JsValue] = Action.async[JsValue](parse.json) {
+  val authAction = {
+    val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
+    new BasicAuthenticatedAction(basicAuthFilterConfig)
+  }
+
+  def processNotification(ackRef : String) : Action[JsValue] = authAction.async[JsValue](parse.json) {
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
           director.goToService(ackRef, notif.regime, notif) map {
-            status => Status(status)
+            case OK =>
+              Ok(Json.obj(
+                "result" -> "ok",
+                "timestamp" -> notif.timestamp
+              ))
+            case otherStatus => new Status(otherStatus)
+          } recover {
+            case ex: NotFoundException =>
+              Logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
+              NotFound(Json.obj(
+                "result"->"failed",
+                "timestamp" -> notif.timestamp,
+                "reason" -> "Acknowledgement reference not found"
+              ))
+            case ex : ServiceUnavailableException =>
+              Logger.error(s"SERVICE UNAVAILABLE : ${ex}")
+              ServiceUnavailable(
+                Json.obj(
+                  "result"->"failed",
+                  "timestamp" -> notif.timestamp
+                )
+              )
+            case ex  => {
+              Logger.error(s"INTERNAL SERVER ERROR : ${ex}")
+              InternalServerError(
+                Json.obj(
+                  "result"->"failed",
+                  "timestamp" -> notif.timestamp
+                )
+              )
+            }
           }
       }
   }
