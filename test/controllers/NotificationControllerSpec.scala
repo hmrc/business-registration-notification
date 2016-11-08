@@ -26,7 +26,7 @@ import org.mockito.Mockito._
 import org.mockito.Matchers
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
 import util.ServiceDirector
 import play.api.test.Helpers._
 
@@ -63,7 +63,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     "return an BADREQUEST" when {
       "the UTR is too long" in new Setup {
 
-        val request = FakeRequest().withBody(Json.toJson(data))
+        val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data))
 
         when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data))(Matchers.any()))
           .thenReturn(Future.successful(OK))
@@ -74,7 +74,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
 
       "the UTR isnt present" in new Setup {
 
-        val request = FakeRequest().withBody(Json.toJson(data.copy(taxId = Some(""))))
+        val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some(""))))
 
         when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some(""))))(Matchers.any()))
           .thenReturn(Future.successful(OK))
@@ -87,14 +87,59 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     "return an OK" when {
       "a record has been successfully updated" in new Setup {
 
-        val request = FakeRequest().withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+        val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
-        when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+        when(mockDirector
+          .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
           .thenReturn(Future.successful(OK))
 
         val result = await(TestController.processNotification("testAckRef")(request))
         status(result) shouldBe OK
       }
+    }
+
+    "return an other status" in new Setup {
+      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+
+      when(mockDirector
+        .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+        .thenReturn(Future.successful(CONTINUE))
+
+      val result = await(TestController.processNotification("testAckRef")(request))
+      status(result) shouldBe CONTINUE
+    }
+
+    "return a NotFound" in new Setup {
+      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+
+      when(mockDirector
+        .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+        .thenReturn(Future.failed(new NotFoundException("")))
+
+      val result = await(TestController.processNotification("testAckRef")(request))
+      status(result) shouldBe NOT_FOUND
+    }
+
+    "return a ServiceUnavailable" in new Setup {
+      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+
+      when(mockDirector
+        .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+        .thenReturn(Future.failed(new ServiceUnavailableException("")))
+
+      val result = await(TestController.processNotification("testAckRef")(request))
+      status(result) shouldBe SERVICE_UNAVAILABLE
+    }
+
+    "return a InternalServerError" in new Setup {
+      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+
+      when(mockDirector
+        .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+        .thenReturn(Future.failed(new InternalServerException("")))
+
+      val result = await(TestController.processNotification("testAckRef")(request))
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }
 }
