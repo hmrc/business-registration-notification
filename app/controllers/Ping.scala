@@ -27,25 +27,24 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.Future
 
 object Ping extends Ping with ServicesConfig {
-	val http = WSHttp
-	val authAction = {
-		val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
-		new BasicAuthenticatedAction(basicAuthFilterConfig)
-	}
+  val http = WSHttp
+  val authAction = {
+    val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
+    new BasicAuthenticatedAction(basicAuthFilterConfig)
+  }
 
 }
 
 trait Ping extends BaseController {
 
-	val http: HttpGet
-	val authAction: ActionBuilder[Request]
+  val http: HttpGet
+  val authAction: ActionBuilder[Request]
 
-	def noAuth() = Action.async { implicit request =>
-		Future.successful(Ok(""))
-	}
+  def noAuth() = Action.async { implicit request =>
+    Future.successful(Ok(""))
+  }
 
-	def auth() = authAction {
-		Ok("")
-	}
-
+  def auth() = authAction {
+    Ok("")
+  }
 }
