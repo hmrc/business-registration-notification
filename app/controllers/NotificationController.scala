@@ -16,17 +16,23 @@
 
 package controllers
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import models.ETMPNotification
 import play.api.Logger
 import play.api.Play._
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Action
+import play.api.libs.json._
+import play.api.mvc.{Action, Request, Result}
 import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import util.ServiceDirector
+import _root_.util.ServiceDirector
+import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 object NotificationController extends NotificationController {
   val director = ServiceDirector
@@ -55,29 +61,47 @@ trait NotificationController extends BaseController {
           } recover {
             case ex: NotFoundException =>
               Logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
-              NotFound(Json.obj(
-                "result"->"failed",
-                "timestamp" -> notif.timestamp,
-                "reason" -> "Acknowledgement reference not found"
-              ))
+              NotFound(buildFailureResponse(notif.timestamp, Some("Acknowledgement reference not found")))
             case ex : ServiceUnavailableException =>
               Logger.error(s"SERVICE UNAVAILABLE : ${ex}")
-              ServiceUnavailable(
-                Json.obj(
-                  "result"->"failed",
-                  "timestamp" -> notif.timestamp
-                )
-              )
+              ServiceUnavailable(buildFailureResponse(notif.timestamp))
             case ex  => {
               Logger.error(s"INTERNAL SERVER ERROR : ${ex}")
-              InternalServerError(
-                Json.obj(
-                  "result"->"failed",
-                  "timestamp" -> notif.timestamp
-                )
-              )
+              InternalServerError(buildFailureResponse(notif.timestamp))
             }
           }
       }
   }
+
+  def buildFailureResponse(timestamp: String, message: Option[String] = None): JsObject = {
+    val response = Json.obj("result" -> "failed", "timestamp" -> timestamp)
+    message match {
+      case Some(m) => response ++ Json.obj("reason" -> m)
+      case _ => response
+    }
+  }
+
+  def timestampNow() : String = {
+    val timeStampFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
+    val format: SimpleDateFormat = new SimpleDateFormat(timeStampFormat)
+    format.format(new Date(DateTime.now(DateTimeZone.UTC).getMillis))
+  }
+
+  override def withJsonBody[T](f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]) =
+    Try(request.body.validate[T]) match {
+      case Success(JsSuccess(payload, _)) => f(payload)
+      case Success(JsError(errs)) =>
+        Future.successful(
+          BadRequest(
+            buildFailureResponse(timestampNow, Some(s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"))
+          )
+        )
+      case Failure(e) =>
+        Future.successful(
+          BadRequest(
+            buildFailureResponse(timestampNow, Some(s"could not parse body due to ${e.getMessage}"))
+          )
+        )
+    }
+
 }
