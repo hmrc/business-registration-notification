@@ -18,9 +18,11 @@ package controllers
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import com.codahale.metrics.Counter
+import mocks.MockMetricsService
 import models.ETMPNotification
 import org.scalatest.mock.MockitoSugar
-import services.CompanyRegistrationService
+import services.{CompanyRegistrationService, MetricsService}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
 import org.mockito.Matchers
@@ -35,6 +37,7 @@ import scala.concurrent.Future
 class NotificationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   val mockDirector = mock[ServiceDirector]
+  val mockMetrics = mock[MetricsService]
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -50,6 +53,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
   class Setup {
     object TestController extends NotificationController {
       val director = mockDirector
+      val metrics = MockMetricsService
     }
   }
 
