@@ -37,11 +37,13 @@ import scala.util.{Failure, Success, Try}
 
 object NotificationController extends NotificationController {
   val director = ServiceDirector
+  val metrics = MetricsService
 }
 
 trait NotificationController extends BaseController {
 
   val director : ServiceDirector
+  val metrics : MetricsService
 
   val authAction = {
     val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
@@ -54,6 +56,7 @@ trait NotificationController extends BaseController {
         notif =>
           director.goToService(ackRef, notif.regime, notif) map {
             case OK =>
+              metrics.etmpNotificationCounter.inc(1)
               Ok(Json.obj(
                 "result" -> "ok",
                 "timestamp" -> notif.timestamp
