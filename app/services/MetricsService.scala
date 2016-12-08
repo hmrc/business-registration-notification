@@ -22,16 +22,26 @@ import com.codahale.metrics.Counter
 import com.kenshoo.play.metrics.Metrics
 import play.api.Play
 
-//class MetricsService @Inject()(metrics: Metrics) {
-//  val etmpNotificationCounter : Counter = metrics.defaultRegistry.counter("etmp-notification-counter")
-//}
-
 object MetricsService extends MetricsService {
   val metrics = Play.current.injector.instanceOf[Metrics]
 
   val etmpNotificationCounter : Counter = metrics.defaultRegistry.counter("etmp-notification-counter")
+
+  val ackRefNotFound : Counter = metrics.defaultRegistry.counter("ack-ref-not-found")
+  val serviceNotAvailable : Counter = metrics.defaultRegistry.counter("service-not-available")
+  val internalServerError : Counter = metrics.defaultRegistry.counter("internal-server-error")
+
+  val clientErrorCodes : Counter = metrics.defaultRegistry.counter("client-error-codes")
+  val serverErrorCodes : Counter = metrics.defaultRegistry.counter("server-error-codes")
 }
 
 trait MetricsService {
   val etmpNotificationCounter : Counter
+
+  val ackRefNotFound : Counter
+  val serviceNotAvailable : Counter
+  val internalServerError : Counter
+
+  val clientErrorCodes : Counter
+  val serverErrorCodes : Counter
 }

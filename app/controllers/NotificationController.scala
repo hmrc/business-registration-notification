@@ -65,12 +65,18 @@ trait NotificationController extends BaseController {
           } recover {
             case ex: NotFoundException =>
               Logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
+              metrics.ackRefNotFound.inc(1)
+              metrics.clientErrorCodes.inc(1)
               NotFound(buildFailureResponse(notif.timestamp, Some("Acknowledgement reference not found")))
             case ex : ServiceUnavailableException =>
               Logger.error(s"SERVICE UNAVAILABLE : ${ex}")
+              metrics.serviceNotAvailable.inc(1)
+              metrics.serverErrorCodes.inc(1)
               ServiceUnavailable(buildFailureResponse(notif.timestamp))
             case ex  => {
               Logger.error(s"INTERNAL SERVER ERROR : ${ex}")
+              metrics.internalServerError.inc(1)
+              metrics.serverErrorCodes.inc(1)
               InternalServerError(buildFailureResponse(notif.timestamp))
             }
           }
