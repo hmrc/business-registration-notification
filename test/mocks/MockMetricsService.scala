@@ -24,4 +24,10 @@ object MockMetricsService extends MetricsService with MockitoSugar {
   val fakeCounter = mock[Counter]
 
   override val etmpNotificationCounter: Counter = fakeCounter
+  override val ackRefNotFound: com.codahale.metrics.Counter = fakeCounter
+  override val clientErrorCodes: com.codahale.metrics.Counter = fakeCounter
+  override val internalServerError: com.codahale.metrics.Counter = fakeCounter
+  override val serverErrorCodes: com.codahale.metrics.Counter = fakeCounter
+  override val serviceNotAvailable: com.codahale.metrics.Counter = fakeCounter
+
 }
