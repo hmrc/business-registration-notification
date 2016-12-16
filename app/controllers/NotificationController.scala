@@ -31,6 +31,7 @@ import _root_.util.ServiceDirector
 import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
 import org.joda.time.{DateTime, DateTimeZone}
 import services.MetricsService
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -39,12 +40,14 @@ import scala.util.{Failure, Success, Try}
 object NotificationController extends NotificationController {
   val director = ServiceDirector
   val metrics = MetricsService
+  val auditConnector = AuditConnector
 }
 
 trait NotificationController extends BaseController {
 
   val director : ServiceDirector
   val metrics : MetricsService
+  val auditConnector : AuditConnector
 
   val authAction = {
     val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
@@ -55,15 +58,19 @@ trait NotificationController extends BaseController {
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
-          new ProcessedNotificationEvent(
-            ProcessedNotificationEventDetail(
-              ackRef,
-              notif.timestamp,
-              notif.regime,
-              notif.taxId,
-              notif.status
+
+          auditConnector.sendEvent(
+            new ProcessedNotificationEvent(
+              ProcessedNotificationEventDetail(
+                ackRef,
+                notif.timestamp,
+                notif.regime,
+                notif.taxId,
+                notif.status
+              )
             )
           )
+
           director.goToService(ackRef, notif.regime, notif) map {
             case OK =>
               metrics.etmpNotificationCounter.inc(1)
