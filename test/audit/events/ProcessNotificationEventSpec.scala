@@ -84,7 +84,6 @@ class ProcessNotificationEventSpec extends UnitSpec {
 
         val result = Json.toJson[ProcessedNotificationEvent](auditEvent)
 
-        println(s"AUDIT EVENT JSON ############ : $result")
         result.getClass shouldBe classOf[JsObject]
         (result \ "auditType").as[String] shouldBe "taxRegistrationUpdateRequest"
         (result \ "detail").as[JsValue] shouldBe Json.toJson(details)
