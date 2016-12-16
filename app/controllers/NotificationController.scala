@@ -28,6 +28,7 @@ import play.api.mvc.{Action, Request, Result}
 import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import _root_.util.ServiceDirector
+import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
 import org.joda.time.{DateTime, DateTimeZone}
 import services.MetricsService
 
@@ -54,6 +55,15 @@ trait NotificationController extends BaseController {
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
+          new ProcessedNotificationEvent(
+            ProcessedNotificationEventDetail(
+              ackRef,
+              notif.timestamp,
+              notif.regime,
+              notif.taxId,
+              notif.status
+            )
+          )
           director.goToService(ackRef, notif.regime, notif) map {
             case OK =>
               metrics.etmpNotificationCounter.inc(1)
