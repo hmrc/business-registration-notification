@@ -16,26 +16,43 @@
 
 package util
 
-import config.Regimes
+import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
+import config.{MicroserviceAuditConnector, Regimes}
 import models.ETMPNotification
 import models.ETMPNotification.convertToCRPost
 import play.api.Logger
 import services.CompanyRegistrationService
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ServiceDirector extends ServiceDirector {
   val ctService = CompanyRegistrationService
+  val auditConnector = MicroserviceAuditConnector
 }
 
 trait ServiceDirector extends Regimes {
 
   val ctService : CompanyRegistrationService
+  val auditConnector : AuditConnector
 
   def goToService(ackRef : String, regime : String, data : ETMPNotification)(implicit hc : HeaderCarrier) : Future[Int] = {
     regime match {
-      case CORPORATION_TAX => ctService.sendToCompanyRegistration(ackRef, convertToCRPost(data))
+      case CORPORATION_TAX =>
+        auditConnector.sendEvent(
+          new ProcessedNotificationEvent(
+            ProcessedNotificationEventDetail(
+              ackRef,
+              data.timestamp,
+              data.regime,
+              data.taxId,
+              data.status
+            )
+          )
+        )
+        ctService.sendToCompanyRegistration(ackRef, convertToCRPost(data))
       case _ =>
         Logger.info(s"[ServiceDirector] - [goToService] : An unsupported tax regime was presented")
         Future.successful(INVALID_REGIME)
