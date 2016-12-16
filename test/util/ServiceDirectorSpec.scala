@@ -24,6 +24,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.test.Helpers.OK
 import org.mockito.Mockito._
 import org.mockito.Matchers
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -31,12 +32,14 @@ import scala.concurrent.Future
 class ServiceDirectorSpec extends UnitSpec with WithFakeApplication with MockitoSugar with Regimes {
 
   val mockCtService = mock[CompanyRegistrationService]
+  val mockAuditConnector = mock[AuditConnector]
 
   implicit val hc = new HeaderCarrier()
 
   class Setup {
     object TestDirector extends ServiceDirector {
       val ctService = mockCtService
+      val auditConnector = mockAuditConnector
     }
   }
 
