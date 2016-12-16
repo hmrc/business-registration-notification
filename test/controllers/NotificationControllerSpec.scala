@@ -31,6 +31,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
 import util.ServiceDirector
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.Future
 
@@ -38,6 +39,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
 
   val mockDirector = mock[ServiceDirector]
   val mockMetrics = mock[MetricsService]
+  val mockAuditConnector = mock[AuditConnector]
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -54,6 +56,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     object TestController extends NotificationController {
       val director = mockDirector
       val metrics = MockMetricsService
+      val auditConnector = mockAuditConnector
     }
   }
 

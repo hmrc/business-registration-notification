@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import _root_.util.ServiceDirector
 import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
+import config.MicroserviceAuditConnector
 import org.joda.time.{DateTime, DateTimeZone}
 import services.MetricsService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -40,7 +41,7 @@ import scala.util.{Failure, Success, Try}
 object NotificationController extends NotificationController {
   val director = ServiceDirector
   val metrics = MetricsService
-  val auditConnector = AuditConnector
+  val auditConnector = MicroserviceAuditConnector
 }
 
 trait NotificationController extends BaseController {
