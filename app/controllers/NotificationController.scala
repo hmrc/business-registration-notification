@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,15 +101,21 @@ trait NotificationController extends BaseController {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>
+        val message = s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
+        Logger.info(message)
+        Logger.info(s"Notification message - ${request.body}")
         Future.successful(
           BadRequest(
-            buildFailureResponse(timestampNow, Some(s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"))
+            buildFailureResponse(timestampNow, Some(message))
           )
         )
       case Failure(e) =>
+        val message = s"could not parse body due to ${e.getMessage}"
+        Logger.warn(message)
+        Logger.info(s"Notification message - ${request.body}")
         Future.successful(
           BadRequest(
-            buildFailureResponse(timestampNow, Some(s"could not parse body due to ${e.getMessage}"))
+            buildFailureResponse(timestampNow, Some(message))
           )
         )
     }
