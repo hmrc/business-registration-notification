@@ -101,15 +101,20 @@ trait NotificationController extends BaseController {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>
+        val message = s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
+        Logger.info(message)
+        Logger.info(s"Notification message - ${request.body}")
         Future.successful(
           BadRequest(
-            buildFailureResponse(timestampNow, Some(s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"))
+            buildFailureResponse(timestampNow, Some(message))
           )
         )
       case Failure(e) =>
+        val message = s"could not parse body due to ${e.getMessage}"
+        Logger.warn(message)
         Future.successful(
           BadRequest(
-            buildFailureResponse(timestampNow, Some(s"could not parse body due to ${e.getMessage}"))
+            buildFailureResponse(timestampNow, Some(message))
           )
         )
     }
