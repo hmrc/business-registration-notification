@@ -33,10 +33,6 @@ trait CompanyRegistrationService {
   val crConnector : CompanyRegistrationConnector
 
   def sendToCompanyRegistration(ackRef : String, crPost : CompanyRegistrationPost)(implicit hc : HeaderCarrier) : Future[Int] = {
-    crConnector.processAcknowledgment(ackRef, crPost) map {
-      resp =>
-        Logger.info(s"[CompanyRegistrationService] - [sendToCompanyRegistration] - status code : ${resp.status}, message : ${resp.body}")
-        resp.status
-    }
+    crConnector.processAcknowledgment(ackRef, crPost) map (_.status)
   }
 }
