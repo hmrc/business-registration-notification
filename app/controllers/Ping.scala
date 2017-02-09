@@ -16,29 +16,23 @@
 
 package controllers
 
+import javax.inject.Inject
+
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
+import com.google.inject.Singleton
 import config.WSHttp
-import play.api.Play.current
 import play.api.mvc._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HttpGet
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
 
-object Ping extends Ping with ServicesConfig {
+@Singleton
+class Ping @Inject() (basicAuthFilterConfig: BasicAuthenticationFilterConfiguration) extends BaseController with ServicesConfig {
   val http = WSHttp
-  val authAction = {
-    val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
+  val authAction: ActionBuilder[Request] = {
     new BasicAuthenticatedAction(basicAuthFilterConfig)
   }
-
-}
-
-trait Ping extends BaseController {
-
-  val http: HttpGet
-  val authAction: ActionBuilder[Request]
 
   def noAuth() = Action.async { implicit request =>
     Future.successful(Ok(""))

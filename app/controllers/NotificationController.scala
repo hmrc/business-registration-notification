@@ -18,35 +18,33 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import javax.inject.Inject
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import models.ETMPNotification
 import play.api.Logger
-import play.api.Play._
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
 import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import _root_.util.ServiceDirector
+import com.google.inject.Singleton
 import org.joda.time.{DateTime, DateTimeZone}
-import services.MetricsService
+import services.MetricsServiceImp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-object NotificationController extends NotificationController {
+@Singleton
+class NotificationController @Inject()(
+                                        metricsService: MetricsServiceImp,
+                                        basicAuthFilterConfig: BasicAuthenticationFilterConfiguration)
+  extends BaseController {
   val director = ServiceDirector
-  val metrics = MetricsService
-}
-
-trait NotificationController extends BaseController {
-
-  val director : ServiceDirector
-  val metrics : MetricsService
+  val metrics = metricsService
 
   val authAction = {
-    val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
     new BasicAuthenticatedAction(basicAuthFilterConfig)
   }
 
