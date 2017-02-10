@@ -16,12 +16,14 @@
 
 package controllers
 
+import org.scalatest.mock.MockitoSugar
+import play.api.Configuration
 import play.api.http.Status
 import play.api.test.{FakeApplication, FakeRequest}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
-class PingSpec extends UnitSpec with WithFakeApplication {
+class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
   val testUserName = "foo"
   val testPassword = "bar"
@@ -33,24 +35,29 @@ class PingSpec extends UnitSpec with WithFakeApplication {
     "Test.basicAuthentication.password" -> testPassword
   ))
 
+  val mockConf = mock[Configuration]
+
   "GET /ping/noauth" should {
+    val controller = new Ping(mockConf)
     val fakeRequest = FakeRequest("GET", "/ping/noauth")
     "return 200" in {
-      val result = Ping.noAuth()(fakeRequest)
+      val result = controller.noAuth()(fakeRequest)
       status(result) shouldBe Status.OK
     }
   }
 
   "GET /ping" should {
     "return 401 if no creds" in {
+      val controller = new Ping(mockConf)
       val fakeRequest = FakeRequest("GET", "/ping")
-      val result = Ping.auth()(fakeRequest)
+      val result = controller.auth()(fakeRequest)
       status(result) shouldBe Status.UNAUTHORIZED
     }
 
     "return 200 if the username and password match the config" in {
+      val controller = new Ping(mockConf)
       val fakeRequest = FakeRequest("GET", "/ping").withHeaders("Authorization"->"Basic Zm9vOmJhcg==")
-      val result = Ping.auth()(fakeRequest)
+      val result = controller.auth()(fakeRequest)
       status(result) shouldBe Status.OK
     }
 

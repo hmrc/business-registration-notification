@@ -18,7 +18,6 @@ package config.filters
 
 import javax.inject.Inject
 import play.api.http.DefaultHttpFilters
-import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
 import uk.gov.hmrc.play.filters.{NoCacheFilter, RecoveryFilter}
 
 
@@ -27,12 +26,11 @@ import uk.gov.hmrc.play.filters.{NoCacheFilter, RecoveryFilter}
   */
 class MicroserviceFilters @Inject()(
                                    auditFilter: MicroserviceAuditFilter,
-                                   loggingFilter: MicroserviceLoggingFilter,
-                                   authFilter: AuthorisationFilter
+                                   loggingFilter: MicroserviceLoggingFilter
                                    ) extends DefaultHttpFilters(
   auditFilter,
   loggingFilter,
-  authFilter,
   NoCacheFilter,
   RecoveryFilter
 )
+

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import config.MicroserviceAuthConnector
 import play.api.Play
 import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.config.ControllerConfig
@@ -35,7 +36,7 @@ import uk.gov.hmrc.play.config.ControllerConfig
  */
 
 //package config
-
+//
 //import com.typesafe.config.Config
 //import net.ceedubs.ficus.Ficus._
 //import play.api.{Application, Configuration, Play}
@@ -46,13 +47,13 @@ import uk.gov.hmrc.play.config.ControllerConfig
 //import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
 //import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 //import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-
-
-
+//
+//
+//
 //object ControllerConfiguration extends ControllerConfig {
 //  lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
 //}
-
+//
 //
 //object AuthParamsControllerConfiguration extends AuthParamsControllerConfig {
 //  lazy val controllerConfigs = ControllerConfiguration.controllerConfigs
@@ -84,5 +85,5 @@ import uk.gov.hmrc.play.config.ControllerConfig
 //
 //  override val authFilter = Some(MicroserviceAuthFilter)
 //}
-//
-//
+
+

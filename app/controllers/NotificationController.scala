@@ -20,9 +20,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
 
-import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
+import basicauth.{BasicAuthenticatedAction, BasicAuthentication, BasicAuthenticationFilterConfiguration}
 import models.ETMPNotification
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
 import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
@@ -39,13 +39,16 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class NotificationController @Inject()(
                                         metricsService: MetricsServiceImp,
-                                        basicAuthFilterConfig: BasicAuthenticationFilterConfiguration)
-  extends BaseController {
+                                        conf: Configuration)
+  extends BaseController with BasicAuthentication {
+
+  override val config = conf
+
   val director = ServiceDirector
   val metrics = metricsService
 
   val authAction = {
-    new BasicAuthenticatedAction(basicAuthFilterConfig)
+    new BasicAuthenticatedAction(getBasicAuthConfig())
   }
 
   def processNotification(ackRef : String) : Action[JsValue] = authAction.async[JsValue](parse.json) {

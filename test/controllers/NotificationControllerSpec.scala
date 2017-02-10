@@ -22,10 +22,11 @@ import com.codahale.metrics.Counter
 import mocks.MockMetricsService
 import models.ETMPNotification
 import org.scalatest.mock.MockitoSugar
-import services.{CompanyRegistrationService, MetricsService}
+import services.{CompanyRegistrationService, MetricsService, MetricsServiceImp}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
 import org.mockito.Matchers
+import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
@@ -52,17 +53,22 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     "04"
   )
 
+  val mockMetricsImp = mock[MetricsServiceImp]
+  val mockConf = mock[Configuration]
+
   class Setup {
-    object TestController extends NotificationController {
-      val director = mockDirector
-      val metrics = MockMetricsService
+    object TestController extends NotificationController(mockMetricsImp, mockConf) {
+      override val director = mockDirector
+      override val metrics = mockMetricsImp
       val auditConnector = mockAuditConnector
     }
   }
 
+
   "NotificationController" should {
     "use the correct service" in {
-      NotificationController.director shouldBe ServiceDirector
+      val controller = new NotificationController(mockMetricsImp, mockConf)
+      controller.director shouldBe ServiceDirector
     }
   }
 
