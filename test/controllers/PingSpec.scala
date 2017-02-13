@@ -16,11 +16,17 @@
 
 package controllers
 
+import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
+import config.WSHttp
 import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito._
 import play.api.Configuration
 import play.api.http.Status
+import play.api.test.Helpers._
 import play.api.test.{FakeApplication, FakeRequest}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+
+import scala.concurrent.Future
 
 
 class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
@@ -36,28 +42,45 @@ class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
   ))
 
   val mockConf = mock[Configuration]
+  val mockWSHttp = mock[WSHttp]
+
+  class Setup {
+    object TestController extends Ping {
+      override val authAction = mockAuthAction
+      val config = mockConf
+      val http = mockWSHttp
+
+    }
+  }
+
+  val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
+  val mockAuthAction = new BasicAuthenticatedAction(bafc)
+  val authAction = mockAuthAction
 
   "GET /ping/noauth" should {
-    val controller = new Ping(mockConf)
-    val fakeRequest = FakeRequest("GET", "/ping/noauth")
-    "return 200" in {
-      val result = controller.noAuth()(fakeRequest)
+    "return 200" in new Setup {
+      val fakeRequest = FakeRequest("GET", "/ping/noauth")
+      val result = TestController.noAuth()(fakeRequest)
       status(result) shouldBe Status.OK
     }
   }
 
   "GET /ping" should {
     "return 401 if no creds" in {
-      val controller = new Ping(mockConf)
+      val controller = new Ping {
+        override val config: Configuration = mockConf
+        override val http = mockWSHttp
+        val bafc2 = new BasicAuthenticationFilterConfiguration("1234", true, "username", "password")
+        override val authAction = new BasicAuthenticatedAction(bafc2)
+      }
       val fakeRequest = FakeRequest("GET", "/ping")
       val result = controller.auth()(fakeRequest)
       status(result) shouldBe Status.UNAUTHORIZED
     }
 
-    "return 200 if the username and password match the config" in {
-      val controller = new Ping(mockConf)
+    "return 200 if the username and password match the config" in new Setup {
       val fakeRequest = FakeRequest("GET", "/ping").withHeaders("Authorization"->"Basic Zm9vOmJhcg==")
-      val result = controller.auth()(fakeRequest)
+      val result = TestController.auth()(fakeRequest)
       status(result) shouldBe Status.OK
     }
 

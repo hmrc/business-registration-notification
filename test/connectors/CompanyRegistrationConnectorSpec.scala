@@ -21,7 +21,6 @@ import mocks.MockHttp
 import models.CompanyRegistrationPost
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
 import org.mockito.Matchers
@@ -40,18 +39,19 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    object TestConnector extends CompanyRegistrationConnector {
-      val companyRegUrl = "testUrl"
-      val http = mockHttp
+    object TestConnector extends CompanyRegistrationConnector(mockHttp) {
+      override val companyRegUrl = "testUrl"
+      override val http = mockHttp
     }
   }
 
   "CompanyRegistrationConnector" should {
+    val connector = new CompanyRegistrationConnector(mockHttp)
     "use the correct companyRegUrl" in {
-      CompanyRegistrationConnector.companyRegUrl shouldBe "http://localhost:9973/company-registration"
+      connector.companyRegUrl shouldBe "http://localhost:9973/company-registration"
     }
     "use the correct http library" in {
-      CompanyRegistrationConnector.http shouldBe WSHttp
+      connector.http shouldBe classOf[WSHttp]
     }
   }
 

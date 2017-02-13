@@ -16,27 +16,33 @@
 
 package util
 
+import javax.inject.{Inject, Singleton}
+
 import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
 import config.{MicroserviceAuditConnector, Regimes}
 import models.ETMPNotification
 import models.ETMPNotification.convertToCRPost
 import play.api.Logger
-import services.CompanyRegistrationService
+import services.{CompanyRegistrationService, RegistrationService}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object ServiceDirector extends ServiceDirector {
-  val ctService = CompanyRegistrationService
-  val auditConnector = MicroserviceAuditConnector
+@Singleton
+class ServiceDirector @Inject() (companyRegistrationService: CompanyRegistrationService,
+                                 microserviceAuditConnector: MicroserviceAuditConnector) extends ServiceDir {
+  val ctService = companyRegistrationService
+  val auditConnector = microserviceAuditConnector
+
 }
 
-trait ServiceDirector extends Regimes {
+trait ServiceDir extends Regimes {
 
-  val ctService : CompanyRegistrationService
-  val auditConnector : AuditConnector
+  val ctService: RegistrationService
+  val auditConnector: AuditConnector
+
 
   def goToService(ackRef : String, regime : String, data : ETMPNotification)(implicit hc : HeaderCarrier) : Future[Int] = {
     regime match {
@@ -59,3 +65,4 @@ trait ServiceDirector extends Regimes {
     }
   }
 }
+

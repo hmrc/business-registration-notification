@@ -16,6 +16,8 @@
 
 package services
 
+import javax.inject.{Inject, Singleton}
+
 import connectors.CompanyRegistrationConnector
 import models.CompanyRegistrationPost
 import play.api.Logger
@@ -24,15 +26,19 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object CompanyRegistrationService extends CompanyRegistrationService {
-  val crConnector = CompanyRegistrationConnector
+@Singleton
+class CompanyRegistrationService @Inject() (companyRegistrationConnector: CompanyRegistrationConnector) extends RegistrationService{
+
+  val crConnector = companyRegistrationConnector
+
 }
 
-trait CompanyRegistrationService {
+trait RegistrationService {
 
-  val crConnector : CompanyRegistrationConnector
+  val crConnector: CompanyRegistrationConnector
 
-  def sendToCompanyRegistration(ackRef : String, crPost : CompanyRegistrationPost)(implicit hc : HeaderCarrier) : Future[Int] = {
+  def sendToCompanyRegistration(ackRef: String, crPost: CompanyRegistrationPost)(implicit hc: HeaderCarrier): Future[Int] = {
     crConnector.processAcknowledgment(ackRef, crPost) map (_.status)
   }
+
 }

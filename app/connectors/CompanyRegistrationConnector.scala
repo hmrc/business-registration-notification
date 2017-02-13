@@ -16,6 +16,8 @@
 
 package connectors
 
+import javax.inject.Inject
+
 import config.WSHttp
 import models.CompanyRegistrationPost
 import play.api.libs.json.{JsValue, Json}
@@ -24,15 +26,15 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
 
 import scala.concurrent.Future
 
-object CompanyRegistrationConnector extends CompanyRegistrationConnector with ServicesConfig {
+class CompanyRegistrationConnector @Inject()(wSHttp: WSHttp) extends RegistrationConnector {
   val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
-  val http = WSHttp
+  val http = wSHttp
 }
 
-trait CompanyRegistrationConnector {
+trait RegistrationConnector extends ServicesConfig{
 
   val companyRegUrl : String
-  val http : HttpPost
+  val http : WSHttp
 
   def processAcknowledgment(ackRef : String, crPost : CompanyRegistrationPost)(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
     val json = Json.toJson(crPost)

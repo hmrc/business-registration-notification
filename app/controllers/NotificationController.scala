@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
 
-import basicauth.{BasicAuthenticatedAction, BasicAuthentication, BasicAuthenticationFilterConfiguration}
+import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import models.ETMPNotification
 import play.api.{Configuration, Logger}
 import play.api.libs.json._
@@ -30,7 +30,8 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import _root_.util.ServiceDirector
 import com.google.inject.Singleton
 import org.joda.time.{DateTime, DateTimeZone}
-import services.MetricsServiceImp
+import services.{MetricsService, MetricsServiceImp}
+import _root_.util.ServiceDir
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -39,17 +40,27 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class NotificationController @Inject()(
                                         metricsService: MetricsServiceImp,
-                                        conf: Configuration)
-  extends BaseController with BasicAuthentication {
+                                        conf: Configuration,
+                                        serviceDirector: ServiceDirector)
+  extends NotificationCtrl with BasicAuthentication {
 
   override val config = conf
 
-  val director = ServiceDirector
+  val director = serviceDirector
   val metrics = metricsService
-
   val authAction = {
     new BasicAuthenticatedAction(getBasicAuthConfig())
   }
+
+}
+
+trait NotificationCtrl extends BaseController {
+
+  val config : Configuration
+
+  val director : ServiceDir
+  val metrics : MetricsService
+  val authAction : BasicAuthenticatedAction
 
   def processNotification(ackRef : String) : Action[JsValue] = authAction.async[JsValue](parse.json) {
     implicit request =>

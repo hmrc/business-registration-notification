@@ -17,24 +17,31 @@
 package controllers
 
 import javax.inject.Inject
-
-import basicauth.{BasicAuthenticatedAction, BasicAuthentication, BasicAuthenticationFilterConfiguration}
+import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import com.google.inject.Singleton
 import config.WSHttp
 import play.api.Configuration
 import play.api.mvc._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.microservice.controller.BaseController
-
 import scala.concurrent.Future
 
 @Singleton
-class Ping @Inject() (conf: Configuration) extends BaseController with ServicesConfig with BasicAuthentication {
+class PingImp @Inject() (conf: Configuration, wSHttp: WSHttp) extends Ping {
+
   override val config = conf
-  val http = WSHttp
+  val http = wSHttp
   val authAction: ActionBuilder[Request] = {
     new BasicAuthenticatedAction(getBasicAuthConfig())
   }
+
+}
+
+trait Ping extends BaseController with ServicesConfig with BasicAuthentication {
+
+  val config: Configuration
+  val http: WSHttp
+  val authAction: ActionBuilder[Request]
 
   def noAuth() = Action.async { implicit request =>
     Future.successful(Ok(""))
@@ -43,4 +50,6 @@ class Ping @Inject() (conf: Configuration) extends BaseController with ServicesC
   def auth() = authAction {
     Ok("")
   }
+
 }
+
