@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import sbt._
 
 object MicroServiceBuild extends Build with MicroService {
@@ -19,7 +35,9 @@ private object AppDependencies {
   private val playConfigVersion = "3.0.0"
   private val domainVersion = "4.0.0"
   private val hmrcTestVersion = "2.1.0"
-  private val scalaTestVersion = "2.2.6"
+  private val scalaTestVersion_test = "3.0.1"
+  private val scalaTestVersion_it = "2.2.6"
+  private val scalaTestPlusVersion = "1.5.1"
   private val pegdownVersion = "1.6.0"
 
 
@@ -44,7 +62,7 @@ private object AppDependencies {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
-        "org.scalatest" %% "scalatest" % "2.2.6" % scope,
+        "org.scalatest" %% "scalatest" % scalaTestVersion_test % scope,
         "org.scalatestplus" %% "play" % "1.2.0" % scope,
         "org.pegdown" % "pegdown" % "1.5.0" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
@@ -60,10 +78,12 @@ private object AppDependencies {
 
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
-        "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
+        "org.scalatest" %% "scalatest" % scalaTestVersion_it % scope,
+        "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope
+        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
+        "com.github.tomakehurst" % "wiremock" % "2.5.0" % scope
       )
     }.test
   }
