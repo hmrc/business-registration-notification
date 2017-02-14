@@ -39,21 +39,12 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    object TestConnector extends CompanyRegistrationConnector(mockHttp) {
-      override val companyRegUrl = "testUrl"
-      override val http = mockHttp
+    object TestConnector extends RegistrationConnector {
+      val companyRegUrl = "testUrl"
+      val http = mockHttp
     }
   }
 
-  "CompanyRegistrationConnector" should {
-    val connector = new CompanyRegistrationConnector(mockHttp)
-    "use the correct companyRegUrl" in {
-      connector.companyRegUrl shouldBe "http://localhost:9973/company-registration"
-    }
-    "use the correct http library" in {
-      connector.http shouldBe classOf[WSHttp]
-    }
-  }
 
   "processAcknowledgment" should {
 

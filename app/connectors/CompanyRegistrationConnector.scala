@@ -26,12 +26,12 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
 
 import scala.concurrent.Future
 
-class CompanyRegistrationConnector @Inject()(wSHttp: WSHttp) extends RegistrationConnector {
+class CompanyRegistrationConnector @Inject()(wSHttp: WSHttp) extends RegistrationConnector with ServicesConfig {
   val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
   val http = wSHttp
 }
 
-trait RegistrationConnector extends ServicesConfig{
+trait RegistrationConnector {
 
   val companyRegUrl : String
   val http : WSHttp
@@ -41,3 +41,4 @@ trait RegistrationConnector extends ServicesConfig{
     http.POST[JsValue, HttpResponse](s"$companyRegUrl/corporation-tax-registration/acknowledgement-confirmation?ackref=$ackRef", json)
   }
 }
+
