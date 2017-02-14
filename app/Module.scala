@@ -15,7 +15,7 @@
  */
 
 import com.google.inject.AbstractModule
-import config.{AppStartup, DefaultAppStartup}
+import config.{WSHttp, AppStartup, DefaultAppStartup}
 import controllers.{NotificationController, NotificationCtrl, Ping, PingImp}
 import services.{CompanyRegistrationService, MetricsService, MetricsServiceImp, RegistrationService}
 

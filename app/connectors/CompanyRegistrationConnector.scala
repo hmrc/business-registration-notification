@@ -16,7 +16,7 @@
 
 package connectors
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import config.WSHttp
 import models.CompanyRegistrationPost
@@ -26,8 +26,9 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
 
 import scala.concurrent.Future
 
+@Singleton
 class CompanyRegistrationConnector @Inject()(wSHttp: WSHttp) extends RegistrationConnector with ServicesConfig {
-  val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
+  lazy val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
   val http = wSHttp
 }
 
