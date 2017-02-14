@@ -18,37 +18,49 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import javax.inject.Inject
 
-import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
+import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import models.ETMPNotification
-import play.api.Logger
-import play.api.Play._
+import play.api.{Configuration, Logger}
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
 import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import _root_.util.ServiceDirector
+import com.google.inject.Singleton
 import org.joda.time.{DateTime, DateTimeZone}
-import services.MetricsService
+import services.{MetricsService, MetricsServiceImp}
+import _root_.util.ServiceDir
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-object NotificationController extends NotificationController {
-  val director = ServiceDirector
-  val metrics = MetricsService
+@Singleton
+class NotificationController @Inject()(
+                                        metricsService: MetricsServiceImp,
+                                        conf: Configuration,
+                                        serviceDirector: ServiceDirector)
+  extends NotificationCtrl with BasicAuthentication {
+
+  override val config = conf
+
+  val director = serviceDirector
+  val metrics = metricsService
+  val authAction = {
+    new BasicAuthenticatedAction(getBasicAuthConfig())
+  }
+
 }
 
-trait NotificationController extends BaseController {
+trait NotificationCtrl extends BaseController {
 
-  val director : ServiceDirector
+  val config : Configuration
+
+  val director : ServiceDir
   val metrics : MetricsService
-
-  val authAction = {
-    val basicAuthFilterConfig = BasicAuthenticationFilterConfiguration.parse(current.mode, current.configuration)
-    new BasicAuthenticatedAction(basicAuthFilterConfig)
-  }
+  val authAction : BasicAuthenticatedAction
 
   def processNotification(ackRef : String) : Action[JsValue] = authAction.async[JsValue](parse.json) {
     implicit request =>

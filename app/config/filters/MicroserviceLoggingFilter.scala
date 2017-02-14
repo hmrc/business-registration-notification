@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package mocks
+package config.filters
 
-import com.codahale.metrics.{Counter, Timer}
-import org.scalatest.mock.MockitoSugar
+import javax.inject.Inject
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
 
-object MockMetricsService extends MockitoSugar {
-  val fakeCounter = mock[Counter]
+/**
+  * Created by jackie on 08/02/17.
+  */
+class MicroserviceLoggingFilter @Inject()(
+                                           controllerConf: ControllerConfiguration
+                                         ) extends LoggingFilter with MicroserviceFilterSupport {
 
-  val etmpNotificationCounter: Counter = fakeCounter
-  val ackRefNotFound: com.codahale.metrics.Counter = fakeCounter
-  val clientErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val internalServerError: com.codahale.metrics.Counter = fakeCounter
-  val serverErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val serviceNotAvailable: com.codahale.metrics.Counter = fakeCounter
-
+  override def controllerNeedsLogging(controllerName: String) =
+    controllerConf.paramsForController(controllerName).needsLogging
 }

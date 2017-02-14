@@ -16,7 +16,7 @@
 
 package util
 
-import config.Regimes
+import config.{MicroserviceAuditConnector, Regimes}
 import models.ETMPNotification
 import org.scalatest.mock.MockitoSugar
 import services.CompanyRegistrationService
@@ -32,14 +32,15 @@ import scala.concurrent.Future
 class ServiceDirectorSpec extends UnitSpec with WithFakeApplication with MockitoSugar with Regimes {
 
   val mockCtService = mock[CompanyRegistrationService]
-  val mockAuditConnector = mock[AuditConnector]
+  val mockAuditConnector = mock[MicroserviceAuditConnector]
 
   implicit val hc = new HeaderCarrier()
 
+
   class Setup {
-    object TestDirector extends ServiceDirector {
-      val ctService = mockCtService
-      val auditConnector = mockAuditConnector
+    object TestDirector extends ServiceDirector(mockCtService, mockAuditConnector) {
+      override val ctService = mockCtService
+      override val auditConnector = mockAuditConnector
     }
   }
 

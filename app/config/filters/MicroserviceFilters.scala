@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package mocks
+package config.filters
 
-import com.codahale.metrics.{Counter, Timer}
-import org.scalatest.mock.MockitoSugar
+import javax.inject.Inject
+import play.api.http.DefaultHttpFilters
+import uk.gov.hmrc.play.filters.{NoCacheFilter, RecoveryFilter}
 
-object MockMetricsService extends MockitoSugar {
-  val fakeCounter = mock[Counter]
 
-  val etmpNotificationCounter: Counter = fakeCounter
-  val ackRefNotFound: com.codahale.metrics.Counter = fakeCounter
-  val clientErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val internalServerError: com.codahale.metrics.Counter = fakeCounter
-  val serverErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val serviceNotAvailable: com.codahale.metrics.Counter = fakeCounter
+/**
+  * Created by jackie on 08/02/17.
+  */
+class MicroserviceFilters @Inject()(
+                                   auditFilter: MicroserviceAuditFilter,
+                                   loggingFilter: MicroserviceLoggingFilter
+                                   ) extends DefaultHttpFilters(
+  auditFilter,
+  loggingFilter,
+  NoCacheFilter,
+  RecoveryFilter
+)
 
-}

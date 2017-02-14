@@ -51,7 +51,7 @@ class BasicAuthenticatedAction(authConfig: BasicAuthenticationFilterConfiguratio
   }
 }
 
-case class BasicAuthenticationFilterConfiguration(realm: String, enabled: Boolean,
+class BasicAuthenticationFilterConfiguration(realm: String, val enabled: Boolean,
                                                   username: String, password: String) {
   val basicRealm = "Basic realm=\"" + realm + "\""
 
@@ -63,21 +63,36 @@ case class BasicAuthenticationFilterConfiguration(realm: String, enabled: Boolea
   }
 }
 
-object BasicAuthenticationFilterConfiguration extends RunMode {
-  /* Required in app-config - the password MUST be encrypted by WebOps
-    basicAuthentication.enabled: true
-    basicAuthentication.realm: 'Production'
-    basicAuthentication.username: 'xxx'
-    basicAuthentication.password: 'yyy'
-  */
-  def parse(mode: Mode, configuration: Configuration): BasicAuthenticationFilterConfiguration = {
+trait BasicAuthentication extends RunMode {
+  val config: Configuration
+
+  def getBasicAuthConfig(): BasicAuthenticationFilterConfiguration = {
     def key(k: String) = s"basicAuthentication.$k"
 
-    val enabled = mustGetConfigString(mode, configuration, key("enabled")).toBoolean
-    val realm = mustGetConfigString(mode, configuration, key("realm"))
-    val username = mustGetConfigString(mode, configuration, key("username"))
-    val password = mustGetConfigString(mode, configuration, key("password"))
+    val enabled = config.getString(key("enabled")).get.toBoolean
+    val realm = config.getString(key("realm")).get
+    val username = config.getString(key("username")).get
+    val password = config.getString(key("password")).get
 
-    BasicAuthenticationFilterConfiguration(realm,enabled,username,password)
+    new BasicAuthenticationFilterConfiguration(realm,enabled,username,password)
   }
 }
+
+//object BasicAuthenticationFilterConfiguration extends RunMode {
+//  /* Required in app-config - the password MUST be encrypted by WebOps
+//    basicAuthentication.enabled: true
+//    basicAuthentication.realm: 'Production'
+//    basicAuthentication.username: 'xxx'
+//    basicAuthentication.password: 'yyy'
+//  */
+//  def parse(mode: Mode, configuration: Configuration): BasicAuthenticationFilterConfiguration = {
+//    def key(k: String) = s"basicAuthentication.$k"
+//
+//    val enabled = mustGetConfigString(mode, configuration, key("enabled")).toBoolean
+//    val realm = mustGetConfigString(mode, configuration, key("realm"))
+//    val username = mustGetConfigString(mode, configuration, key("username"))
+//    val password = mustGetConfigString(mode, configuration, key("password"))
+//
+//    BasicAuthenticationFilterConfiguration(realm,enabled,username,password)
+//  }
+//}

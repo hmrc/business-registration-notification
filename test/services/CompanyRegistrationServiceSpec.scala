@@ -16,6 +16,7 @@
 
 package services
 
+import config.WSHttp
 import connectors.CompanyRegistrationConnector
 import mocks.MockHttp
 import models.CompanyRegistrationPost
@@ -31,21 +32,23 @@ import scala.concurrent.Future
 class CompanyRegistrationServiceSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
 
   val mockConnector = mock[CompanyRegistrationConnector]
+  val mockWSHttp = mock[WSHttp]
 
   val response = mockHttpResponse(OK)
 
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    object TestService extends CompanyRegistrationService {
-      val crConnector = mockConnector
+    object TestService extends CompanyRegistrationService(mockConnector) {
+      override val crConnector = mockConnector
     }
   }
 
   "CompanyRegistrationService" should {
-    "use the correct crConnector" in {
-      CompanyRegistrationService.crConnector shouldBe CompanyRegistrationConnector
-    }
+//    "use the correct crConnector" in {
+//      val service = new CompanyRegistrationService(mockConnector)
+//      service.crConnector shouldBe classOf[CompanyRegistrationConnector]
+//    }
   }
 
   "sendToCompanyRegistration" should {

@@ -16,14 +16,16 @@
 
 package services
 
-import javax.inject.Inject
-
+import javax.inject.{Singleton,Inject}
 import com.codahale.metrics.Counter
 import com.kenshoo.play.metrics.Metrics
-import play.api.Play
 
-object MetricsService extends MetricsService {
-  val metrics = Play.current.injector.instanceOf[Metrics]
+/**
+  * Created by jackie on 09/02/17.
+  */
+@Singleton
+class MetricsServiceImp @Inject() (val metricsInstance: Metrics) extends MetricsService {
+  val metrics = metricsInstance
 
   val etmpNotificationCounter : Counter = metrics.defaultRegistry.counter("etmp-notification-counter")
 
@@ -33,6 +35,7 @@ object MetricsService extends MetricsService {
 
   val clientErrorCodes : Counter = metrics.defaultRegistry.counter("client-error-codes")
   val serverErrorCodes : Counter = metrics.defaultRegistry.counter("server-error-codes")
+
 }
 
 trait MetricsService {

@@ -1,6 +1,9 @@
 # microservice specific routes
 
-GET        /ping/noauth             controllers.Ping.noAuth
-GET        /ping                    controllers.Ping.auth
+GET        /ping/noauth             @controllers.Ping.noAuth
+GET        /ping                    @controllers.Ping.auth
 
-POST       /notification/:ackref    controllers.NotificationController.processNotification(ackref : String)
+POST       /notification/:ackref    @controllers.NotificationController.processNotification(ackref : String)
+
+
+

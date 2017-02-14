@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package mocks
+import com.google.inject.AbstractModule
+import config.{AppStartup, DefaultAppStartup}
+import services.{MetricsService, MetricsServiceImp}
 
-import com.codahale.metrics.{Counter, Timer}
-import org.scalatest.mock.MockitoSugar
+/**
+  * Created by jackie on 09/02/17.
+  */
+class Module extends AbstractModule {
 
-object MockMetricsService extends MockitoSugar {
-  val fakeCounter = mock[Counter]
+  val gridFSNAme = "brn"
 
-  val etmpNotificationCounter: Counter = fakeCounter
-  val ackRefNotFound: com.codahale.metrics.Counter = fakeCounter
-  val clientErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val internalServerError: com.codahale.metrics.Counter = fakeCounter
-  val serverErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val serviceNotAvailable: com.codahale.metrics.Counter = fakeCounter
+  override def configure(): Unit = {
+    bind(classOf[AppStartup])
+      .to(classOf[DefaultAppStartup])
+      .asEagerSingleton()
+
+    bindServices()
+
+  }
+
+  private def bindServices() {
+    bind(classOf[MetricsService]) to classOf[MetricsServiceImp]
+  }
 
 }
