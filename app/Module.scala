@@ -16,7 +16,8 @@
 
 import com.google.inject.AbstractModule
 import config.{AppStartup, DefaultAppStartup}
-import services.{MetricsService, MetricsServiceImp}
+import controllers.{NotificationController, NotificationCtrl, Ping, PingImp}
+import services.{CompanyRegistrationService, MetricsService, MetricsServiceImp, RegistrationService}
 
 /**
   * Created by jackie on 09/02/17.
@@ -30,12 +31,16 @@ class Module extends AbstractModule {
       .to(classOf[DefaultAppStartup])
       .asEagerSingleton()
 
+    bind(classOf[NotificationCtrl]) to classOf[NotificationController]
+    bind(classOf[Ping]) to classOf[PingImp]
+
     bindServices()
 
   }
 
   private def bindServices() {
     bind(classOf[MetricsService]) to classOf[MetricsServiceImp]
+    bind(classOf[RegistrationService]) to classOf[CompanyRegistrationService]
   }
 
 }
