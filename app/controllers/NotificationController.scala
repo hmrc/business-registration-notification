@@ -115,7 +115,6 @@ trait NotificationCtrl extends BaseController {
       case Success(JsError(errs)) =>
         val message = s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
         Logger.info(message)
-        Logger.info(s"Notification message - ${request.body}")
         Future.successful(
           BadRequest(
             buildFailureResponse(timestampNow, Some(message))
@@ -124,7 +123,6 @@ trait NotificationCtrl extends BaseController {
       case Failure(e) =>
         val message = s"could not parse body due to ${e.getMessage}"
         Logger.warn(message)
-        Logger.info(s"Notification message - ${request.body}")
         Future.successful(
           BadRequest(
             buildFailureResponse(timestampNow, Some(message))
