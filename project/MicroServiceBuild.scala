@@ -27,14 +27,14 @@ private object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val microserviceBootstrapVersion = "5.8.0"
-  private val playAuthVersion = "4.2.0"
-  private val playHealthVersion = "2.0.0"
+  private val microserviceBootstrapVersion = "5.13.0"
+  private val playAuthVersion = "4.3.0"
+  private val playHealthVersion = "2.1.0"
   private val playJsonLoggerVersion = "3.0.0"
-  private val playUrlBindersVersion = "2.0.0"
-  private val playConfigVersion = "3.0.0"
-  private val domainVersion = "4.0.0"
-  private val hmrcTestVersion = "2.2.0"
+  private val playUrlBindersVersion = "2.1.0"
+  private val playConfigVersion = "4.3.0"
+  private val domainVersion = "4.1.0"
+  private val hmrcTestVersion = "2.3.0"
   private val scalaTestVersion_test = "3.0.1"
   private val scalaTestVersion_it = "2.2.6"
   private val scalaTestPlusVersion = "1.5.1"
