@@ -21,9 +21,9 @@ import javax.inject.{Inject, Singleton}
 import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
 import config.{MicroserviceAuditConnector, Regimes}
 import models.ETMPNotification
-import models.ETMPNotification.convertToCRPost
+import models.ETMPNotification.{convertToCRPost, convertToPRPost}
 import play.api.Logger
-import services.{CompanyRegistrationService, RegistrationService}
+import services.RegistrationService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -31,16 +31,16 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class ServiceDirector @Inject() (companyRegistrationService: CompanyRegistrationService,
+class ServiceDirector @Inject() (registrationService: RegistrationService,
                                  microserviceAuditConnector: MicroserviceAuditConnector) extends ServiceDir {
-  val ctService = companyRegistrationService
+  val regService = registrationService
   val auditConnector = microserviceAuditConnector
 
 }
 
 trait ServiceDir extends Regimes {
 
-  val ctService: RegistrationService
+  val regService: RegistrationService
   val auditConnector: AuditConnector
 
 
@@ -58,7 +58,8 @@ trait ServiceDir extends Regimes {
             )
           )
         )
-        ctService.sendToCompanyRegistration(ackRef, convertToCRPost(data))
+        regService.sendToCompanyRegistration(ackRef, convertToCRPost(data))
+      case PAYE => regService.sendToPAYERegistration(ackRef, convertToPRPost(data))
       case _ =>
         Logger.info(s"[ServiceDirector] - [goToService] : An unsupported tax regime was presented")
         Future.successful(INVALID_REGIME)

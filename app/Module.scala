@@ -15,9 +15,9 @@
  */
 
 import com.google.inject.AbstractModule
-import config.{WSHttp, AppStartup, DefaultAppStartup}
+import config.{AppStartup, DefaultAppStartup}
 import controllers.{NotificationController, NotificationCtrl, Ping, PingImp}
-import services.{CompanyRegistrationService, MetricsService, MetricsServiceImp, RegistrationService}
+import services.{MetricsService, MetricsServiceImp, RegistrationService, RegistrationSrv}
 
 /**
   * Created by jackie on 09/02/17.
@@ -40,7 +40,7 @@ class Module extends AbstractModule {
 
   private def bindServices() {
     bind(classOf[MetricsService]) to classOf[MetricsServiceImp]
-    bind(classOf[RegistrationService]) to classOf[CompanyRegistrationService]
+    bind(classOf[RegistrationSrv]) to classOf[RegistrationService]
   }
 
 }

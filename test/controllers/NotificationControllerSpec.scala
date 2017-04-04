@@ -20,21 +20,17 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import com.codahale.metrics.Counter
-import mocks.MockMetricsService
 import models.ETMPNotification
-import org.scalatest.mock.MockitoSugar
-import services.{CompanyRegistrationService, MetricsService, MetricsServiceImp}
+import org.scalatest.mockito.MockitoSugar
+import services.{MetricsService}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
 import org.mockito.Matchers
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.{Answer, OngoingStubbing}
-import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
-import util.{ServiceDir, ServiceDirector}
+import util.{ServiceDir}
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 

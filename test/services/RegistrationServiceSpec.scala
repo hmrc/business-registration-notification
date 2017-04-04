@@ -17,10 +17,10 @@
 package services
 
 import config.WSHttp
-import connectors.CompanyRegistrationConnector
+import connectors.{CompanyRegistrationConnector, PAYERegistrationConnector}
 import mocks.MockHttp
-import models.CompanyRegistrationPost
-import org.scalatest.mock.MockitoSugar
+import models.{CompanyRegistrationPost, PAYERegistrationPost}
+import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.test.Helpers.OK
 import org.mockito.Mockito._
@@ -29,9 +29,10 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class CompanyRegistrationServiceSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
+class RegistrationServiceSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
 
-  val mockConnector = mock[CompanyRegistrationConnector]
+  val mockCRConnector = mock[CompanyRegistrationConnector]
+  val mockPAYEConnector = mock[PAYERegistrationConnector]
   val mockWSHttp = mock[WSHttp]
 
   val response = mockHttpResponse(OK)
@@ -39,16 +40,10 @@ class CompanyRegistrationServiceSpec extends UnitSpec with WithFakeApplication w
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    object TestService extends CompanyRegistrationService(mockConnector) {
-      override val crConnector = mockConnector
+    val testService = new RegistrationSrv {
+      override val crConnector = mockCRConnector
+      override val payeConnector = mockPAYEConnector
     }
-  }
-
-  "CompanyRegistrationService" should {
-//    "use the correct crConnector" in {
-//      val service = new CompanyRegistrationService(mockConnector)
-//      service.crConnector shouldBe classOf[CompanyRegistrationConnector]
-//    }
   }
 
   "sendToCompanyRegistration" should {
@@ -59,10 +54,26 @@ class CompanyRegistrationServiceSpec extends UnitSpec with WithFakeApplication w
         "testStatus"
       )
 
-      when(mockConnector.processAcknowledgment(Matchers.eq("testAckRef"), Matchers.eq(data))(Matchers.any()))
+      when(mockCRConnector.processAcknowledgment(Matchers.eq("testAckRef"), Matchers.eq(data))(Matchers.any()))
         .thenReturn(Future.successful(response))
 
-      val result = await(TestService.sendToCompanyRegistration("testAckRef", data))
+      val result = await(testService.sendToCompanyRegistration("testAckRef", data))
+      result shouldBe OK
+    }
+  }
+
+  "sendToPAYERegistration" should {
+    "return an int" in new Setup {
+      val data = PAYERegistrationPost(
+        Some("testEMPREF"),
+        "testTimeStamp",
+        "testStatus"
+      )
+
+      when(mockPAYEConnector.processAcknowledgement(Matchers.eq("testAckRef"), Matchers.eq(data))(Matchers.any()))
+        .thenReturn(Future.successful(response))
+
+      val result = await(testService.sendToPAYERegistration("testAckRef", data))
       result shouldBe OK
     }
   }

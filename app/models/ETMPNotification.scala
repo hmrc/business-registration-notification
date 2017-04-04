@@ -34,9 +34,17 @@ object ETMPNotification extends NotificationValidator {
 
   def convertToCRPost(eTMPNotification: ETMPNotification) : CompanyRegistrationPost = {
     CompanyRegistrationPost(
-      eTMPNotification.taxId,
-      eTMPNotification.timestamp,
-      eTMPNotification.status
+      ctUtr = eTMPNotification.taxId,
+      timestamp = eTMPNotification.timestamp,
+      status = eTMPNotification.status
+    )
+  }
+
+  def convertToPRPost(etmpNotification: ETMPNotification): PAYERegistrationPost = {
+    PAYERegistrationPost(
+      empRef = etmpNotification.taxId,
+      timestamp = etmpNotification.timestamp,
+      status = etmpNotification.status
     )
   }
 }
@@ -48,3 +56,12 @@ case class CompanyRegistrationPost(ctUtr : Option[String],
 object CompanyRegistrationPost {
   implicit val format = Json.format[CompanyRegistrationPost]
 }
+
+case class PAYERegistrationPost(empRef: Option[String],
+                                timestamp: String,
+                                status: String)
+
+object PAYERegistrationPost {
+  implicit val format = Json.format[PAYERegistrationPost]
+}
+

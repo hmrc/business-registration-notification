@@ -17,7 +17,7 @@
 package mocks
 
 import com.codahale.metrics.{Counter, Timer}
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 object MockMetricsService extends MockitoSugar {
   val fakeCounter = mock[Counter]
