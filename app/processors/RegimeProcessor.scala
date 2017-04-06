@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package mocks
+package processors
 
-import com.codahale.metrics.Counter
-import org.scalatest.mockito.MockitoSugar
+import models.ETMPNotification
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-object MockMetricsService extends MockitoSugar {
-  val fakeCounter = mock[Counter]
+import scala.concurrent.Future
 
-  val etmpNotificationCounter: Counter = fakeCounter
-  val ackRefNotFound: com.codahale.metrics.Counter = fakeCounter
-  val clientErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val internalServerError: com.codahale.metrics.Counter = fakeCounter
-  val serverErrorCodes: com.codahale.metrics.Counter = fakeCounter
-  val serviceNotAvailable: com.codahale.metrics.Counter = fakeCounter
-
+trait RegimeProcessor {
+  def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int]
 }

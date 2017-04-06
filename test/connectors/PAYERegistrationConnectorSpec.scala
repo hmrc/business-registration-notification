@@ -18,19 +18,18 @@ package connectors
 
 import config.WSHttp
 import mocks.MockHttp
-import models.CompanyRegistrationPost
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import org.mockito.Mockito._
+import models.PAYERegistrationPost
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.test.Helpers.OK
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
-import play.api.test.Helpers._
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
-
+class PAYERegistrationConnectorSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
   val mockHttp = mock[WSHttp]
 
   val successResponse = mockHttpResponse(OK)
@@ -38,8 +37,8 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    object TestConnector extends RegistrationConnector {
-      val companyRegUrl = "testUrl"
+    object TestConnector extends PAYERegistrationConnect {
+      val payeRegUrl = "testUrl"
       val http = mockHttp
     }
   }
@@ -47,13 +46,13 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication
 
   "processAcknowledgment" should {
 
-    val crPost = CompanyRegistrationPost(
+    val payePost = PAYERegistrationPost(
       Some("testID"),
       "testTimeStamp",
       "testStatus"
     )
 
-    val crJson = Json.toJson(crPost)
+    val payeJson = Json.toJson(payePost)
 
     "return a HTTPResponse" in new Setup {
       when(mockHttp.POST[JsValue, HttpResponse]
@@ -61,7 +60,7 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication
         (ArgumentMatchers.any[Writes[JsValue]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(successResponse))
 
-      val result = await(TestConnector.processAcknowledgment("testID", crPost))
+      val result = await(TestConnector.processAcknowledgement("testAckRef", payePost))
       result.status shouldBe OK
     }
   }

@@ -17,10 +17,8 @@
 package basicauth
 
 import play.api.Configuration
-import play.api.Mode.Mode
 import play.api.http.HeaderNames.{AUTHORIZATION, WWW_AUTHENTICATE}
-import play.api.mvc.{Result, _}
-import config.ConfigHelper._
+import play.api.mvc._
 import uk.gov.hmrc.play.config.RunMode
 
 import scala.concurrent.Future

@@ -36,6 +36,8 @@ class NotificationISpec extends IntegrationSpecBase {
     "microservice.services.auth.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.paye-registration.host" -> s"$mockHost",
+    "microservice.services.paye-registration.port" -> s"$mockPort",
     "basicAuthentication.enabled" -> "true",
     "basicAuthentication.realm" -> "test",
     "basicAuthentication.username" -> "foo",
@@ -57,7 +59,7 @@ class NotificationISpec extends IntegrationSpecBase {
     s"""Basic ${enc}"""
   }
 
-  "CT Notification" should {
+  "Notification" should {
     def setupSimpleAuthMocks() = {
       stubPost("/write/audit", 200, """{"x":2}""")
       stubGet("/auth/authority", 200, """{"uri":"xxx","credentials":{"gatewayId":"xxx2"},"userDetailsLink":"xxx3","ids":"/auth/ids"}""")
@@ -80,6 +82,33 @@ class NotificationISpec extends IntegrationSpecBase {
             withStatus(200).
             withBody(jsonCR)
         )
+      )
+
+      val response = client(s"/notification/BRCT0001").
+        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+        post(jsonBR).
+        futureValue
+
+      response.status shouldBe 200
+      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+    }
+
+    "call PR and return a success" in new Setup {
+      setupSimpleAuthMocks()
+
+      val timestamp = "2017-01-01T00:00:00"
+      val jsonBR = s"""{"timestamp":"${timestamp}", "regime":"paye", "status":"04"}"""
+      val jsonPR = s"""{"timestamp":"${timestamp}", "status":"04"}"""
+
+      stubFor(
+        post(urlMatching("/paye-registration/registration-processed-confirmation?(.*)"))
+          .withQueryParam("ackref", equalTo("BRCT0001"))
+          .withRequestBody(equalToJson(jsonPR))
+          .willReturn(
+            aResponse().
+              withStatus(200).
+              withBody(jsonPR)
+          )
       )
 
       val response = client(s"/notification/BRCT0001").

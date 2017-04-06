@@ -19,6 +19,7 @@ package config
 trait Regimes {
 
   val CORPORATION_TAX = "corporation-tax"
+  val PAYE            = "paye"
 
   val INVALID_REGIME = 400
 }

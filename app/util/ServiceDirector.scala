@@ -18,47 +18,32 @@ package util
 
 import javax.inject.{Inject, Singleton}
 
-import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
-import config.{MicroserviceAuditConnector, Regimes}
+import config.Regimes
 import models.ETMPNotification
-import models.ETMPNotification.convertToCRPost
 import play.api.Logger
-import services.{CompanyRegistrationService, RegistrationService}
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import processors.{CTProcessor, PAYEProcessor, RegimeProcessor}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class ServiceDirector @Inject() (companyRegistrationService: CompanyRegistrationService,
-                                 microserviceAuditConnector: MicroserviceAuditConnector) extends ServiceDir {
-  val ctService = companyRegistrationService
-  val auditConnector = microserviceAuditConnector
+class ServiceDirector @Inject()(payeRegimeProcessor: PAYEProcessor,
+                                ctRegimeProcessor: CTProcessor) extends ServiceDir {
 
+  val payeProcessor = payeRegimeProcessor
+  val ctProcessor = ctRegimeProcessor
 }
 
 trait ServiceDir extends Regimes {
 
-  val ctService: RegistrationService
-  val auditConnector: AuditConnector
-
+  val payeProcessor: RegimeProcessor
+  val ctProcessor: RegimeProcessor
 
   def goToService(ackRef : String, regime : String, data : ETMPNotification)(implicit hc : HeaderCarrier) : Future[Int] = {
     regime match {
-      case CORPORATION_TAX =>
-        auditConnector.sendEvent(
-          new ProcessedNotificationEvent(
-            ProcessedNotificationEventDetail(
-              ackRef,
-              data.timestamp,
-              data.regime,
-              data.taxId,
-              data.status
-            )
-          )
-        )
-        ctService.sendToCompanyRegistration(ackRef, convertToCRPost(data))
+      case CORPORATION_TAX => ctProcessor.processRegime(ackRef, data)
+      case PAYE => payeProcessor.processRegime(ackRef, data)
       case _ =>
         Logger.info(s"[ServiceDirector] - [goToService] : An unsupported tax regime was presented")
         Future.successful(INVALID_REGIME)

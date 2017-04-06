@@ -18,7 +18,6 @@ package basicauth
 
 import util.{BasicBase64, Divider}
 
-
 case class BasicAuthCredentials(username: String, password: String) {
   val conjoined = username + ':' + password
 
