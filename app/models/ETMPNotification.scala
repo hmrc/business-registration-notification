@@ -31,22 +31,6 @@ object ETMPNotification extends NotificationValidator {
     (__ \ "business-tax-identifier").formatNullable[String](taxIdentifierValidator) and
     (__ \ "status").format[String](statusValidator)
   )(ETMPNotification.apply, unlift(ETMPNotification.unapply))
-
-  def convertToCRPost(eTMPNotification: ETMPNotification) : CompanyRegistrationPost = {
-    CompanyRegistrationPost(
-      ctUtr = eTMPNotification.taxId,
-      timestamp = eTMPNotification.timestamp,
-      status = eTMPNotification.status
-    )
-  }
-
-  def convertToPRPost(etmpNotification: ETMPNotification): PAYERegistrationPost = {
-    PAYERegistrationPost(
-      empRef = etmpNotification.taxId,
-      timestamp = etmpNotification.timestamp,
-      status = etmpNotification.status
-    )
-  }
 }
 
 case class CompanyRegistrationPost(ctUtr : Option[String],

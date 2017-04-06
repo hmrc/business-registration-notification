@@ -34,10 +34,11 @@ private object AppDependencies {
   private val playConfigVersion = "4.3.0"
   private val domainVersion = "4.1.0"
   private val hmrcTestVersion = "2.3.0"
-  private val scalaTestVersion_test = "3.0.1"
-  private val scalaTestVersion_it = "2.2.6"
-  private val scalaTestPlusVersion = "1.5.1"
+  private val scalaTestVersion = "3.0.1"
+  private val scalaTestPlusVersion = "2.0.0"
   private val pegdownVersion = "1.6.0"
+  private val mockitoCoreVersion = "2.7.21"
+  private val wiremockVersion = "2.5.1"
 
   val compile = Seq(
 
@@ -59,11 +60,11 @@ private object AppDependencies {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
-        "org.scalatest" %% "scalatest" % scalaTestVersion_test % scope,
-        "org.scalatestplus" %% "play" % "1.2.0" % scope,
-        "org.pegdown" % "pegdown" % "1.5.0" % scope,
+        "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
+        "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
+        "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.mockito" % "mockito-core" % "1.9.5"
+        "org.mockito" % "mockito-core" % mockitoCoreVersion
       )
     }.test
   }
@@ -75,12 +76,11 @@ private object AppDependencies {
 
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
-        "org.scalatest" %% "scalatest" % scalaTestVersion_it % scope,
+        "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
-        "com.github.tomakehurst" % "wiremock" % "2.5.0" % scope
+        "com.github.tomakehurst" % "wiremock" % wiremockVersion % scope
       )
     }.test
   }

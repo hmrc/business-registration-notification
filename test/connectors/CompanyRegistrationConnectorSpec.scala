@@ -22,7 +22,7 @@ import models.CompanyRegistrationPost
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
 import play.api.test.Helpers._
@@ -57,8 +57,8 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with WithFakeApplication
 
     "return a HTTPResponse" in new Setup {
       when(mockHttp.POST[JsValue, HttpResponse]
-        (Matchers.anyString(), Matchers.any[JsValue](), Matchers.any())
-        (Matchers.any[Writes[JsValue]](), Matchers.any[HttpReads[HttpResponse]](), Matchers.any[HeaderCarrier]()))
+        (ArgumentMatchers.anyString(), ArgumentMatchers.any[JsValue](), ArgumentMatchers.any())
+        (ArgumentMatchers.any[Writes[JsValue]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(successResponse))
 
       val result = await(TestConnector.processAcknowledgment("testID", crPost))

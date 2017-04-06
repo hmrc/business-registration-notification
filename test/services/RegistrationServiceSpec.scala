@@ -24,7 +24,7 @@ import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.test.Helpers.OK
 import org.mockito.Mockito._
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -54,7 +54,7 @@ class RegistrationServiceSpec extends UnitSpec with WithFakeApplication with Moc
         "testStatus"
       )
 
-      when(mockCRConnector.processAcknowledgment(Matchers.eq("testAckRef"), Matchers.eq(data))(Matchers.any()))
+      when(mockCRConnector.processAcknowledgment(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq(data))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(response))
 
       val result = await(testService.sendToCompanyRegistration("testAckRef", data))
@@ -70,7 +70,7 @@ class RegistrationServiceSpec extends UnitSpec with WithFakeApplication with Moc
         "testStatus"
       )
 
-      when(mockPAYEConnector.processAcknowledgement(Matchers.eq("testAckRef"), Matchers.eq(data))(Matchers.any()))
+      when(mockPAYEConnector.processAcknowledgement(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq(data))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(response))
 
       val result = await(testService.sendToPAYERegistration("testAckRef", data))

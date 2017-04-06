@@ -18,8 +18,8 @@ package connectors
 
 import config.WSHttp
 import mocks.MockHttp
-import models.{CompanyRegistrationPost, PAYERegistrationPost}
-import org.mockito.Matchers
+import models.PAYERegistrationPost
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json, Writes}
@@ -56,8 +56,8 @@ class PAYERegistrationConnectorSpec extends UnitSpec with WithFakeApplication wi
 
     "return a HTTPResponse" in new Setup {
       when(mockHttp.POST[JsValue, HttpResponse]
-        (Matchers.anyString(), Matchers.any[JsValue](), Matchers.any())
-        (Matchers.any[Writes[JsValue]](), Matchers.any[HttpReads[HttpResponse]](), Matchers.any[HeaderCarrier]()))
+        (ArgumentMatchers.anyString(), ArgumentMatchers.any[JsValue](), ArgumentMatchers.any())
+        (ArgumentMatchers.any[Writes[JsValue]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(successResponse))
 
       val result = await(TestConnector.processAcknowledgement("testAckRef", payePost))

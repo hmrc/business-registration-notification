@@ -22,15 +22,15 @@ import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfigurati
 import com.codahale.metrics.Counter
 import models.ETMPNotification
 import org.scalatest.mockito.MockitoSugar
-import services.{MetricsService}
+import services.MetricsService
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.Mockito._
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
-import util.{ServiceDir}
+import util.ServiceDir
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
@@ -85,7 +85,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     "return an BADREQUEST" when {
       "the UTR is too long" in new Setup {
 
-        when(mockDirector.goToService(Matchers.any(), Matchers.any(), Matchers.any())(Matchers.any()))
+        when(mockDirector.goToService(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(OK))
 
         val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data))
@@ -97,7 +97,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
 
         val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some(""))))
 
-        when(mockDirector.goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some(""))))(Matchers.any()))
+        when(mockDirector.goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some(""))))(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
         val result = await(TestController.processNotification("testAckRef")(request))
@@ -111,7 +111,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
               val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
               when(mockDirector
-                .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+                .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
                 .thenReturn(Future.successful(OK))
 
               val result = await(TestController.processNotification("testAckRef")(request))
@@ -123,7 +123,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
             val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
             when(mockDirector
-              .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+              .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.successful(CONTINUE))
 
             val result = await(TestController.processNotification("testAckRef")(request))
@@ -134,7 +134,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
             val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
             when(mockDirector
-              .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+              .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.failed(new NotFoundException("")))
 
             val result = await(TestController.processNotification("testAckRef")(request))
@@ -145,7 +145,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
             val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
             when(mockDirector
-              .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+              .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.failed(new ServiceUnavailableException("")))
 
             val result = await(TestController.processNotification("testAckRef")(request))
@@ -156,7 +156,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
             val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
             when(mockDirector
-              .goToService(Matchers.eq("testAckRef"), Matchers.eq("corporation-tax"), Matchers.eq(data.copy(taxId = Some("123456789"))))(Matchers.any()))
+              .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.failed(new InternalServerException("")))
 
             val result = await(TestController.processNotification("testAckRef")(request))

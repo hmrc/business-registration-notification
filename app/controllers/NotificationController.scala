@@ -38,11 +38,9 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class NotificationController @Inject()(
-                                        metricsService: MetricsServiceImp,
-                                        conf: Configuration,
-                                        serviceDirector: ServiceDirector)
-  extends NotificationCtrl with BasicAuthentication {
+class NotificationController @Inject()(metricsService: MetricsServiceImp,
+                                       conf: Configuration,
+                                       serviceDirector: ServiceDirector) extends NotificationCtrl with BasicAuthentication {
 
   override val config = conf
 

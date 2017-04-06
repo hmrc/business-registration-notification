@@ -16,27 +16,28 @@
 
 package util
 
-import config.{MicroserviceAuditConnector, Regimes}
+import config.Regimes
 import models.ETMPNotification
 import org.scalatest.mockito.MockitoSugar
-import services.RegistrationService
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.test.Helpers.OK
 import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers
+import processors.{CTProcessor, PAYEProcessor}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class ServiceDirectorSpec extends UnitSpec with WithFakeApplication with MockitoSugar with Regimes {
 
-  val mockCtService = mock[RegistrationService]
-  val mockAuditConnector = mock[MicroserviceAuditConnector]
+  val mockPayeProcessor = mock[PAYEProcessor]
+  val mockCTProcessor = mock[CTProcessor]
 
   implicit val hc = new HeaderCarrier()
 
 
   class Setup {
-    val testDirector = new ServiceDirector(mockCtService, mockAuditConnector)
+    val testDirector = new ServiceDirector(mockPayeProcessor, mockCTProcessor)
   }
 
   "goToService" should {
@@ -60,7 +61,7 @@ class ServiceDirectorSpec extends UnitSpec with WithFakeApplication with Mockito
         "testStatus"
       )
 
-      when(mockCtService.sendToCompanyRegistration("testAckRef", ETMPNotification.convertToCRPost(data)))
+      when(mockCTProcessor.processRegime(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq(data))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(OK))
 
       val result = await(testDirector.goToService("testAckRef", data.regime, data))
@@ -75,7 +76,7 @@ class ServiceDirectorSpec extends UnitSpec with WithFakeApplication with Mockito
         "testStatus"
       )
 
-      when(mockCtService.sendToPAYERegistration("testAckRef", ETMPNotification.convertToPRPost(data)))
+      when(mockPayeProcessor.processRegime(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq(data))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(OK))
 
       val result = await(testDirector.goToService("testAckRef", data.regime, data))
