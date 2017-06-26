@@ -29,11 +29,17 @@ case class ProcessedNotificationEventDetail(acknowledgementReference : String,
 object ProcessedNotificationEventDetail {
   implicit val writes = new Writes[ProcessedNotificationEventDetail] {
     def writes(detail : ProcessedNotificationEventDetail) : JsObject = {
+
+      val taxIdentifier = detail.regime match {
+        case "paye" => "empRef"
+        case _      => "ctUtr"
+      }
+
       val notificationWrites = (
         (__ \ "acknowledgementReference").write[String] and
         (__ \ "timestamp").write[String] and
         (__ \ "regime").write[String] and
-        (__ \ "ctUtr").writeNullable[String] and
+        (__ \ taxIdentifier).writeNullable[String] and
         (__ \ "status").write[String]
       )(unlift(ProcessedNotificationEventDetail.unapply))
 
@@ -42,5 +48,5 @@ object ProcessedNotificationEventDetail {
   }
 }
 
-class ProcessedNotificationEvent(details: ProcessedNotificationEventDetail)
-  extends RegistrationAuditEvent("taxRegistrationUpdateRequest", Json.toJson(details).as[JsObject])
+class ProcessedNotificationEvent(auditRef: String, details: ProcessedNotificationEventDetail, transactionName: Option[String] = None)
+  extends RegistrationAuditEvent(auditRef, Json.toJson(details).as[JsObject], transactionName)

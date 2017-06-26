@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package audit.events
+package constants
 
-import play.api.libs.json.JsObject
-import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import models.ETMPNotification
 
-import RegistrationAuditEvent.buildTags
+object Outcome {
 
-abstract class RegistrationAuditEvent(auditType: String, detail: JsObject, transactionName: Option[String])
-  extends ExtendedDataEvent(
-    auditSource = "business-registration-notification",
-    auditType = auditType,
-    detail = detail,
-    tags = buildTags(transactionName.getOrElse(auditType))
-  )
+  val APPROVED                      = "04"
+  val APPROVED_WITH_CONDITIONS      = "05"
+  val REJECTED                      = "06"
+  val REJECTED_UNDER_REVIEW_APPREAL = "07"
+  val REVOKED                       = "08"
+  val REVOKED_UNDER_REVIEW_APPREAL  = "09"
+  val DEREGISTERED                  = "10"
 
-object RegistrationAuditEvent {
-  def buildTags(auditType: String) : Map[String, String] = {
-    Map("transactionName" -> auditType)
+  def successfulOutcome(data: ETMPNotification): Boolean = {
+    data.status == APPROVED || data.status == APPROVED_WITH_CONDITIONS
   }
+
 }

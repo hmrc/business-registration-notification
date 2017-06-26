@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package audit.events
+package audit.builders
 
-import play.api.libs.json.JsObject
-import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import audit.events.ProcessedNotificationEventDetail
+import models.ETMPNotification
 
-import RegistrationAuditEvent.buildTags
+trait AuditBuilding {
 
-abstract class RegistrationAuditEvent(auditType: String, detail: JsObject, transactionName: Option[String])
-  extends ExtendedDataEvent(
-    auditSource = "business-registration-notification",
-    auditType = auditType,
-    detail = detail,
-    tags = buildTags(transactionName.getOrElse(auditType))
-  )
-
-object RegistrationAuditEvent {
-  def buildTags(auditType: String) : Map[String, String] = {
-    Map("transactionName" -> auditType)
+  def buildAuditEventDetail(ackRef: String, data: ETMPNotification): ProcessedNotificationEventDetail = {
+    ProcessedNotificationEventDetail(
+      ackRef,
+      data.timestamp,
+      data.regime,
+      data.taxId,
+      data.status
+    )
   }
+
 }

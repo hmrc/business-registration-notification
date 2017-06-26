@@ -23,6 +23,7 @@ import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.Helpers.OK
 import services.RegistrationService
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -58,9 +59,32 @@ class PAYEProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSu
 
   "processRegime" should {
     "return an OK int" when {
-      "the data is end PR" in new Setup {
+      "the data is sent to PR and audited successfully" in new Setup {
         when(mockRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
+
+        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+          .thenReturn(Future.successful(Success))
+
+        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        result shouldBe OK
+      }
+      "the data is sent to PR and auditing returns a Failure" in new Setup {
+        when(mockRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(OK))
+
+        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+          .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
+
+        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        result shouldBe OK
+      }
+      "the data is sent to PR and auditing fails" in new Setup {
+        when(mockRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(OK))
+
+        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+          .thenReturn(Future.failed(new RuntimeException))
 
         val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
         result shouldBe OK

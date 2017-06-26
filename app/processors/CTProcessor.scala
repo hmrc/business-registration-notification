@@ -18,7 +18,8 @@ package processors
 
 import javax.inject.{Inject, Singleton}
 
-import audit.events.{ProcessedNotificationEvent, ProcessedNotificationEventDetail}
+import audit.builders.AuditBuilding
+import audit.events.ProcessedNotificationEvent
 import config.MicroserviceAuditConnector
 import models.{CompanyRegistrationPost, ETMPNotification}
 import play.api.Logger
@@ -30,30 +31,25 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CTProcessor @Inject()(auditConnector: MicroserviceAuditConnector, registrationService: RegistrationService) extends RegimeProcessor {
+class CTProcessor @Inject()(
+                             auditConnector: MicroserviceAuditConnector,
+                             registrationService: RegistrationService
+                             ) extends RegimeProcessor with AuditBuilding {
 
   private[processors] def notificationToCRPost(notification: ETMPNotification): CompanyRegistrationPost = {
     CompanyRegistrationPost(notification.taxId, notification.timestamp, notification.status)
   }
 
-  private[processors] def buildAuditEventDetail(ackRef: String, data: ETMPNotification): ProcessedNotificationEvent = {
-    new ProcessedNotificationEvent(
-      ProcessedNotificationEventDetail(
-        ackRef,
-        data.timestamp,
-        data.regime,
-        data.taxId,
-        data.status
-      )
-    )
-  }
-
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
-    auditConnector.sendEvent(buildAuditEventDetail(ackRef, data)) flatMap {
-      case Failure(msg, _) =>
-        Logger.error(s"[CTProcessor] - [processRegime]: Audit event failed because $msg")
-        registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data))
-      case _ => registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data))
+    auditConnector.sendEvent(
+        new ProcessedNotificationEvent("taxRegistrationUpdateRequest", buildAuditEventDetail(ackRef, data))) flatMap {
+      _ => registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data))
+    } recoverWith {
+      case e => handleAuditError(
+        e,
+        registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data)),
+        "[CTProcessor] - [processRegime]"
+      )
     }
   }
 }

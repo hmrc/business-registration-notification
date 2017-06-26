@@ -17,13 +17,15 @@ package api
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{IntegrationSpecBase, WiremockHelper}
+import org.scalatest.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WS
 import util.BasicBase64
+import play.api.{Logger => TestLogger}
 
-class NotificationISpec extends IntegrationSpecBase {
+class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
@@ -66,6 +68,8 @@ class NotificationISpec extends IntegrationSpecBase {
       stubGet("/auth/ids", 200, """{"internalId":"Int-xxx","externalId":"Ext-xxx"}""")
     }
 
+    def setupFailedAuditing() = stubPost("/write/audit", 500, """{"message":"Test Error"}""")
+
     "call CR and return a success" in new Setup {
       setupSimpleAuthMocks()
 
@@ -93,16 +97,16 @@ class NotificationISpec extends IntegrationSpecBase {
       response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
     }
 
-    "call PR and return a success" in new Setup {
+    "call PR and return a success on successful ETMP registration" in new Setup {
       setupSimpleAuthMocks()
 
       val timestamp = "2017-01-01T00:00:00"
-      val jsonBR = s"""{"timestamp":"${timestamp}", "regime":"paye", "status":"04"}"""
-      val jsonPR = s"""{"timestamp":"${timestamp}", "status":"04"}"""
+      val jsonBR = s"""{"timestamp":"${timestamp}", "regime":"paye", "status":"04", "business-tax-identifier":"EMPREF0001"}"""
+      val jsonPR = s"""{"timestamp":"${timestamp}", "status":"04", "empRef":"EMPREF0001"}"""
 
       stubFor(
         post(urlMatching("/paye-registration/registration-processed-confirmation?(.*)"))
-          .withQueryParam("ackref", equalTo("BRCT0001"))
+          .withQueryParam("ackref", equalTo("BRPY0001"))
           .withRequestBody(equalToJson(jsonPR))
           .willReturn(
             aResponse().
@@ -111,7 +115,103 @@ class NotificationISpec extends IntegrationSpecBase {
           )
       )
 
-      val response = client(s"/notification/BRCT0001").
+      val response = client(s"/notification/BRPY0001").
+        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+        post(jsonBR).
+        futureValue
+
+      response.status shouldBe 200
+      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+
+      verify(postRequestedFor(urlMatching("/write/audit"))
+        .withRequestBody(equalToJson(Json.parse(
+          s"""
+            |{
+            |  "auditSource" : "business-registration-notification",
+            |  "auditType" : "successfulTaxServiceRegistration",
+            |  "detail" : {
+            |    "acknowledgementReference" : "BRPY0001",
+            |    "timestamp" : "$timestamp",
+            |    "regime" : "paye",
+            |    "empRef" : "EMPREF0001",
+            |    "status" : "04"
+            |  },
+            |  "tags" : {
+            |    "transactionName" : "payeRegistrationUpdateRequest"
+            |  }
+            |}
+          """.stripMargin).toString(), true, true)
+        )
+      )
+    }
+
+    "call PR and return a success on ETMP rejection" in new Setup {
+      setupSimpleAuthMocks()
+
+      val timestamp = "2017-01-01T00:00:00"
+      val jsonBR = s"""{"timestamp":"$timestamp", "regime":"paye", "status":"07"}"""
+      val jsonPR = s"""{"timestamp":"$timestamp", "status":"07"}"""
+
+      stubFor(
+        post(urlMatching("/paye-registration/registration-processed-confirmation?(.*)"))
+          .withQueryParam("ackref", equalTo("BRPY0002"))
+          .withRequestBody(equalToJson(jsonPR))
+          .willReturn(
+            aResponse().
+              withStatus(200).
+              withBody(jsonPR)
+          )
+      )
+
+      val response = client(s"/notification/BRPY0002").
+        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+        post(jsonBR).
+        futureValue
+
+      response.status shouldBe 200
+      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+
+      verify(postRequestedFor(urlMatching("/write/audit"))
+        .withRequestBody(equalToJson(Json.parse(
+          s"""
+             |{
+             |  "auditSource" : "business-registration-notification",
+             |  "auditType" : "rejectedTaxServiceRegistration",
+             |  "detail" : {
+             |    "acknowledgementReference" : "BRPY0002",
+             |    "timestamp" : "$timestamp",
+             |    "regime" : "paye",
+             |    "status" : "07"
+             |  },
+             |  "tags" : {
+             |    "transactionName" : "payeRegistrationUpdateRequest"
+             |  }
+             |}
+          """.stripMargin).toString(), true, true)
+        )
+      )
+    }
+
+    "handle auditing errors" in new Setup {
+      setupSimpleAuthMocks()
+      setupFailedAuditing()
+
+      val timestamp = "2017-01-01T00:00:00"
+      val jsonBR = s"""{"timestamp":"$timestamp", "regime":"paye", "status":"07"}"""
+      val jsonPR = s"""{"timestamp":"$timestamp", "status":"07"}"""
+
+      stubFor(
+        post(urlMatching("/paye-registration/registration-processed-confirmation?(.*)"))
+          .withQueryParam("ackref", equalTo("BRPY0002"))
+          .withRequestBody(equalToJson(jsonPR))
+          .willReturn(
+            aResponse().
+              withStatus(200).
+              withBody(jsonPR)
+          )
+      )
+
+      val response = client(s"/notification/BRPY0002").
         withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
         post(jsonBR).
         futureValue
