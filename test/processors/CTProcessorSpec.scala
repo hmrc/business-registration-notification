@@ -69,19 +69,12 @@ class CTProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSuga
     }
   }
 
-  "buildAuditEventDetail" should {
-    "return the correct details" in new Setup {
-      val result = testProcessor.buildAuditEventDetail("testAckRef", testEtmpNotification)
-      result.detail shouldBe testEventDetailJson
-    }
-  }
-
   "processRegime" should {
     "return an OK int" when {
       "the audit event fails but still sends the data to CR" in new Setup {
 
         when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
-          .thenReturn(Future.successful(Failure("audit failed", Some(new Throwable))))
+          .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
         when(mockRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))

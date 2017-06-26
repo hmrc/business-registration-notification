@@ -18,22 +18,42 @@ package processors
 
 import javax.inject.{Inject, Singleton}
 
+import audit.builders.AuditBuilding
+import audit.events.ProcessedNotificationEvent
 import config.MicroserviceAuditConnector
 import models.{ETMPNotification, PAYERegistrationPost}
+import constants.Outcome
+import play.api.Logger
 import services.RegistrationService
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Failure
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class PAYEProcessor @Inject()(auditConnector: MicroserviceAuditConnector, registrationService: RegistrationService) extends RegimeProcessor {
+class PAYEProcessor @Inject()(
+                               auditConnector: MicroserviceAuditConnector,
+                               registrationService: RegistrationService
+                               ) extends RegimeProcessor with AuditBuilding {
 
   private[processors] def notificationToPAYEPost(notification: ETMPNotification): PAYERegistrationPost = {
     PAYERegistrationPost(notification.taxId, notification.timestamp, notification.status)
   }
 
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
-    registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data))
+    val auditRef = if(Outcome.successfulOutcome(data)) "successfulTaxServiceRegistration" else "rejectedTaxServiceRegistration"
+    auditConnector.sendEvent(
+      new ProcessedNotificationEvent(
+        auditRef, buildAuditEventDetail(ackRef, data), Some("payeRegistrationUpdateRequest"))
+    ) flatMap {
+      _ => registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data))
+    } recoverWith {
+      case err => handleAuditError(
+        err,
+        registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data)),
+        "[PAYEProcessor] - [processRegime]"
+      )
+    }
   }
 }

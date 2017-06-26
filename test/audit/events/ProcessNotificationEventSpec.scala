@@ -80,7 +80,7 @@ class ProcessNotificationEventSpec extends UnitSpec {
           Some("1234567890"),
           "04")
 
-        val auditEvent = new ProcessedNotificationEvent(details)
+        val auditEvent = new ProcessedNotificationEvent("taxRegistrationUpdateRequest", details)
 
         val result = Json.toJson[ProcessedNotificationEvent](auditEvent)
 
