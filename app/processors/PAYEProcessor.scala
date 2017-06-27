@@ -23,9 +23,7 @@ import audit.events.ProcessedNotificationEvent
 import config.MicroserviceAuditConnector
 import models.{ETMPNotification, PAYERegistrationPost}
 import constants.Outcome
-import play.api.Logger
 import services.RegistrationService
-import uk.gov.hmrc.play.audit.http.connector.AuditResult.Failure
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -46,10 +44,12 @@ class PAYEProcessor @Inject()(
     auditConnector.sendEvent(
       new ProcessedNotificationEvent(
         auditRef, buildAuditEventDetail(ackRef, data), Some("payeRegistrationUpdateRequest"))
-    ) flatMap {
+    ) recover {
+      case e => throw new AuditError(e.getMessage)
+    } flatMap {
       _ => registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data))
     } recoverWith {
-      case err => handleAuditError(
+      case err => handleProcessRegimeError(
         err,
         registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data)),
         "[PAYEProcessor] - [processRegime]"
