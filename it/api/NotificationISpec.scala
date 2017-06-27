@@ -216,8 +216,38 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
         post(jsonBR).
         futureValue
 
+      verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
+
       response.status shouldBe 200
       response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+    }
+
+    "handle downstream errors" in new Setup {
+      setupSimpleAuthMocks()
+
+      val timestamp = "2017-01-01T00:00:00"
+      val jsonBR = s"""{"timestamp":"$timestamp", "regime":"paye", "status":"07"}"""
+      val jsonPR = s"""{"timestamp":"$timestamp", "status":"07"}"""
+
+      stubFor(
+        post(urlMatching("/paye-registration/registration-processed-confirmation?(.*)"))
+          .withQueryParam("ackref", equalTo("BRPY0002"))
+          .withRequestBody(equalToJson(jsonPR))
+          .willReturn(
+            aResponse().
+              withStatus(400).
+              withBody(jsonPR)
+          )
+      )
+
+      val response = client(s"/notification/BRPY0002").
+        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+        post(jsonBR).
+        futureValue
+
+      verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
+
+      response.status shouldBe 500
     }
   }
 

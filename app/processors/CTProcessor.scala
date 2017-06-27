@@ -22,9 +22,7 @@ import audit.builders.AuditBuilding
 import audit.events.ProcessedNotificationEvent
 import config.MicroserviceAuditConnector
 import models.{CompanyRegistrationPost, ETMPNotification}
-import play.api.Logger
 import services.RegistrationService
-import uk.gov.hmrc.play.audit.http.connector.AuditResult.Failure
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -42,10 +40,13 @@ class CTProcessor @Inject()(
 
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
     auditConnector.sendEvent(
-        new ProcessedNotificationEvent("taxRegistrationUpdateRequest", buildAuditEventDetail(ackRef, data))) flatMap {
+      new ProcessedNotificationEvent("taxRegistrationUpdateRequest", buildAuditEventDetail(ackRef, data))
+    ) recover {
+      case e => throw new AuditError(e.getMessage)
+    } flatMap {
       _ => registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data))
     } recoverWith {
-      case e => handleAuditError(
+      case e => handleProcessRegimeError(
         e,
         registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data)),
         "[CTProcessor] - [processRegime]"
