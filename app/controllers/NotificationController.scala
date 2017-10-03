@@ -64,6 +64,7 @@ trait NotificationCtrl extends BaseController {
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
+          Logger.info(s"[NotificationController] - ETMP sent request with ackref : $ackRef and status : ${notif.status} for regime : ${notif.regime}")
           director.goToService(ackRef, notif.regime, notif) map {
             case OK =>
               metrics.etmpNotificationCounter.inc(1)
