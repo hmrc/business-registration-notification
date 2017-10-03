@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
+package config
+
 import com.google.inject.AbstractModule
-import config.{AppStartup, DefaultAppStartup}
 import controllers.{NotificationController, NotificationCtrl, Ping, PingImp}
 import services.{MetricsService, MetricsServiceImp, RegistrationService, RegistrationSrv}
 
-/**
-  * Created by jackie on 09/02/17.
-  */
 class Module extends AbstractModule {
-
-  val gridFSNAme = "brn"
 
   override def configure(): Unit = {
     bind(classOf[AppStartup])
@@ -35,12 +31,10 @@ class Module extends AbstractModule {
     bind(classOf[Ping]) to classOf[PingImp]
 
     bindServices()
-
   }
 
   private def bindServices() {
     bind(classOf[MetricsService]) to classOf[MetricsServiceImp]
     bind(classOf[RegistrationSrv]) to classOf[RegistrationService]
   }
-
 }
