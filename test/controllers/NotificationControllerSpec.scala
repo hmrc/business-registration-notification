@@ -29,12 +29,12 @@ import org.mockito.ArgumentMatchers
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
 import util.ServiceDir
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException }
 
 class NotificationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 

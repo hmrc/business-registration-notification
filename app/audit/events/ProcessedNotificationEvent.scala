@@ -19,6 +19,7 @@ package audit.events
 import play.api.libs.json.Writes
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 case class ProcessedNotificationEventDetail(acknowledgementReference : String,
                                             timestamp : String,
@@ -50,3 +51,8 @@ object ProcessedNotificationEventDetail {
 
 class ProcessedNotificationEvent(auditRef: String, details: ProcessedNotificationEventDetail, transactionName: Option[String] = None)
   extends RegistrationAuditEvent(auditRef, Json.toJson(details).as[JsObject], transactionName)
+
+object ProcessedNotificationEvent {
+  implicit val format = Json.format[ExtendedDataEvent]
+}
+

@@ -23,10 +23,10 @@ import audit.events.ProcessedNotificationEvent
 import config.MicroserviceAuditConnector
 import models.{CompanyRegistrationPost, ETMPNotification}
 import services.RegistrationService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class CTProcessor @Inject()(
@@ -39,7 +39,7 @@ class CTProcessor @Inject()(
   }
 
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
-    auditConnector.sendEvent(
+    auditConnector.sendExtendedEvent(
       new ProcessedNotificationEvent("taxRegistrationUpdateRequest", buildAuditEventDetail(ackRef, data))
     ) recover {
       case e => throw new AuditError(e.getMessage)
