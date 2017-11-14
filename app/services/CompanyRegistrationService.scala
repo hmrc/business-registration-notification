@@ -20,10 +20,10 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{CompanyRegistrationConnector, PAYERegistrationConnector}
 import models.{CompanyRegistrationPost, PAYERegistrationPost}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class RegistrationService @Inject() (companyRegistrationConnector: CompanyRegistrationConnector,

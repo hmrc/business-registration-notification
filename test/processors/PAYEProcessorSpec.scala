@@ -24,10 +24,10 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.test.Helpers.OK
 import services.RegistrationService
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class PAYEProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
@@ -63,7 +63,7 @@ class PAYEProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSu
         when(mockRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.successful(Success))
 
         val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
@@ -73,7 +73,7 @@ class PAYEProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSu
         when(mockRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
         val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
@@ -83,7 +83,7 @@ class PAYEProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSu
         when(mockRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(new RuntimeException))
 
         val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))

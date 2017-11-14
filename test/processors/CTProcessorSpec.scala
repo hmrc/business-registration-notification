@@ -26,9 +26,9 @@ import services.RegistrationService
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.test.Helpers.OK
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CTProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
@@ -73,7 +73,7 @@ class CTProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSuga
     "return an OK int" when {
       "the audit event fails but still sends the data to CR" in new Setup {
 
-        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
         when(mockRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -84,7 +84,7 @@ class CTProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSuga
       }
 
       "the audit event succeeds and sends the data to CR" in new Setup {
-        when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.successful(Success))
 
         when(mockRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))

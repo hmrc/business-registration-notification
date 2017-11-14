@@ -22,10 +22,9 @@ import config.Regimes
 import models.ETMPNotification
 import play.api.Logger
 import processors.{CTProcessor, PAYEProcessor, RegimeProcessor}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class ServiceDirector @Inject()(payeRegimeProcessor: PAYEProcessor,

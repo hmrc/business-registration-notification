@@ -37,7 +37,7 @@
     </appender>
 
 
-    <logger name="accesslog" level="INFO" additivity="false">
+    <logger name="accesslog" level="OFF" additivity="false">
         <appender-ref ref="ACCESS_LOG_FILE" />
     </logger>
 
@@ -45,27 +45,27 @@
         <appender-ref ref="STDOUT_IGNORE_NETTY" />
     </logger>
 
-    <logger name="com.google.inject" level="INFO"/>
-    <logger name="javax.management.mbeanserver" level="INFO"/>
-    <logger name="javax.management.misc" level="INFO"/>
-    <logger name="akka.event.EventStream" level="INFO"/>
-    <logger name="play.api.libs.concurrent.ActorSystemProvider" level="INFO"/>
-    <logger name="org.jboss.netty.channel.socket.nio.SelectorUtil" level="INFO"/>
-    <logger name="uk.gov" level="INFO"/>
-    <logger name="org.asynchttpclient.netty" level="INFO"/>
-    <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="io.netty" level="INFO"/>
-    <logger name="org.apache.http" level="INFO"/>
+    <logger name="com.google.inject" level="OFF"/>
+    <logger name="javax.management.mbeanserver" level="OFF"/>
+    <logger name="javax.management.misc" level="OFF"/>
+    <logger name="akka.event.EventStream" level="OFF"/>
+    <logger name="play.api.libs.concurrent.ActorSystemProvider" level="OFF"/>
+    <logger name="org.jboss.netty.channel.socket.nio.SelectorUtil" level="OFF"/>
+    <logger name="uk.gov" level="OFF"/>
+    <logger name="org.asynchttpclient.netty" level="OFF"/>
+    <logger name="org.eclipse.jetty" level="OFF"/>
+    <logger name="io.netty" level="OFF"/>
+    <logger name="org.apache.http" level="OFF"/>
 
-    <logger name="application-akka" level="INFO"/>
+    <logger name="application-akka" level="OFF"/>
 
-    <logger name="application" level="DEBUG"/>
+    <logger name="application" level="OFF"/>
 
-    <logger name="connector" level="TRACE">
+    <logger name="connector" level="OFF">
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="DEBUG">
+    <root level="ERROR">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>

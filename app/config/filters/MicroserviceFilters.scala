@@ -17,8 +17,9 @@
 package config.filters
 
 import javax.inject.Inject
+
 import play.api.http.DefaultHttpFilters
-import uk.gov.hmrc.play.filters.{NoCacheFilter, RecoveryFilter}
+import uk.gov.hmrc.play.microservice.filters.{NoCacheFilter, RecoveryFilter}
 
 
 /**

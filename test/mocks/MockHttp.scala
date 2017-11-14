@@ -17,8 +17,8 @@
 package mocks
 
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.play.http.HttpResponse
 import org.mockito.Mockito._
+import uk.gov.hmrc.http.HttpResponse
 
 trait MockHttp extends MockitoSugar {
 

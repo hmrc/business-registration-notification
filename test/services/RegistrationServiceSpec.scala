@@ -25,9 +25,9 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.test.Helpers.OK
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class RegistrationServiceSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
 

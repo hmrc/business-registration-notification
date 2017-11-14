@@ -27,10 +27,7 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.Future
 
 @Singleton
-class PingImp @Inject() (conf: Configuration, wSHttp: WSHttp) extends Ping {
-
-  override val config = conf
-  val http = wSHttp
+class PingImp @Inject() (override val config: Configuration) extends Ping {
   val authAction: ActionBuilder[Request] = {
     new BasicAuthenticatedAction(getBasicAuthConfig())
   }
@@ -38,17 +35,14 @@ class PingImp @Inject() (conf: Configuration, wSHttp: WSHttp) extends Ping {
 }
 
 trait Ping extends BaseController with ServicesConfig with BasicAuthentication {
-
-  val config: Configuration
-  val http: WSHttp
   val authAction: ActionBuilder[Request]
 
-  def noAuth() = Action.async { implicit request =>
-    Future.successful(Ok(""))
+  def noAuth() = Action {
+    Ok
   }
 
   def auth() = authAction {
-    Ok("")
+    Ok
   }
 
 }

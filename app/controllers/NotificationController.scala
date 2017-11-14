@@ -25,7 +25,6 @@ import models.ETMPNotification
 import play.api.{Configuration, Logger}
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
-import uk.gov.hmrc.play.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import _root_.util.ServiceDirector
 import com.google.inject.Singleton
@@ -33,23 +32,19 @@ import org.joda.time.{DateTime, DateTimeZone}
 import services.{MetricsService, MetricsServiceImp}
 import _root_.util.ServiceDir
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.{ NotFoundException, ServiceUnavailableException }
 
 @Singleton
-class NotificationController @Inject()(metricsService: MetricsServiceImp,
-                                       conf: Configuration,
-                                       serviceDirector: ServiceDirector) extends NotificationCtrl with BasicAuthentication {
+class NotificationController @Inject()(val metrics: MetricsServiceImp,
+                                       override val config: Configuration,
+                                       val director: ServiceDirector) extends NotificationCtrl with BasicAuthentication {
 
-  override val config = conf
-
-  val director = serviceDirector
-  val metrics = metricsService
   val authAction = {
     new BasicAuthenticatedAction(getBasicAuthConfig())
   }
-
 }
 
 trait NotificationCtrl extends BaseController {

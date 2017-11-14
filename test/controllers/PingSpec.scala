@@ -48,8 +48,6 @@ class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     object TestController extends Ping {
       override val authAction = mockAuthAction
       val config = mockConf
-      val http = mockWSHttp
-
     }
   }
 
@@ -69,7 +67,6 @@ class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     "return 401 if no creds" in {
       val controller = new Ping {
         override val config: Configuration = mockConf
-        override val http = mockWSHttp
         val bafc2 = new BasicAuthenticationFilterConfiguration("1234", true, "username", "password")
         override val authAction = new BasicAuthenticatedAction(bafc2)
       }

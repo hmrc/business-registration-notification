@@ -22,19 +22,21 @@ import config.WSHttp
 import models.PAYERegistrationPost
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
+
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
-class PAYERegistrationConnector @Inject()(wSHttp: WSHttp) extends PAYERegistrationConnect with ServicesConfig {
+class PAYERegistrationConnector extends PAYERegistrationConnect with ServicesConfig {
   lazy val payeRegUrl = s"${baseUrl("paye-registration")}/paye-registration"
-  val http = wSHttp
+  val http: CorePost = WSHttp
 }
 
 trait PAYERegistrationConnect {
   val payeRegUrl : String
-  val http : WSHttp
+  val http : CorePost
 
   def processAcknowledgement(ackRef: String, payePost: PAYERegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val json = Json.toJson(payePost)

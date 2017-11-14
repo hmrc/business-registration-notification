@@ -19,10 +19,10 @@ package config.filters
 import javax.inject.Inject
 import akka.stream.Materializer
 import play.api.Configuration
-import uk.gov.hmrc.play.audit.filters.AuditFilter
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.RunMode
+import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
+import uk.gov.hmrc.play.microservice.filters.AuditFilter
 
 /**
   * Created by jackie on 08/02/17.

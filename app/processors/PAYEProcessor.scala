@@ -24,10 +24,10 @@ import config.MicroserviceAuditConnector
 import models.{ETMPNotification, PAYERegistrationPost}
 import constants.Outcome
 import services.RegistrationService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class PAYEProcessor @Inject()(
@@ -41,7 +41,7 @@ class PAYEProcessor @Inject()(
 
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
     val auditRef = if(Outcome.successfulOutcome(data)) "successfulTaxServiceRegistration" else "rejectedTaxServiceRegistration"
-    auditConnector.sendEvent(
+    auditConnector.sendExtendedEvent(
       new ProcessedNotificationEvent(
         auditRef, buildAuditEventDetail(ackRef, data), Some("payeRegistrationUpdateRequest"))
     ) recover {
