@@ -24,7 +24,7 @@ private object AppDependencies {
 object MainDependencies {
   private val microserviceBootstrapVersion  = "6.18.0"
   private val playUrlBindersVersion         = "2.1.0"
-  private val domainVersion                 = "5.1.0"
+  private val domainVersion                 = "5.2.0"
 
   def apply() = Seq(
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
