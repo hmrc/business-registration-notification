@@ -1,4 +1,4 @@
-# business-registration-notification
+# business-registration-notification.
 
 [![Build Status](https://travis-ci.org/hmrc/business-registration-notification.svg)](https://travis-ci.org/hmrc/business-registration-notification) [ ![Download](https://api.bintray.com/packages/hmrc/releases/business-registration-notification/images/download.svg) ](https://bintray.com/hmrc/releases/business-registration-notification/_latestVersion)
 
