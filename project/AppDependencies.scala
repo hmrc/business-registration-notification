@@ -22,7 +22,7 @@ private object AppDependencies {
 }
 
 object MainDependencies {
-  private val microserviceBootstrapVersion  = "8.3.0"
+  private val microserviceBootstrapVersion  = "8.4.0"
   private val playUrlBindersVersion         = "2.1.0"
   private val domainVersion                 = "5.2.0"
 
@@ -34,7 +34,7 @@ object MainDependencies {
 }
 
 trait TestDependencies {
-  val hmrcTestVersion       = "3.1.0"
+  val hmrcTestVersion       = "3.2.0"
   val scalaTestVersion      = "3.0.1"
   val scalaTestPlusVersion  = "2.0.0"
   val pegdownVersion        = "1.6.0"
