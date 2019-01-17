@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import config.WSHttp
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import play.api.Configuration
+import play.api.Mode.Mode
 import play.api.http.Status
 import play.api.test.Helpers._
 import play.api.test.{FakeApplication, FakeRequest}
@@ -48,6 +49,10 @@ class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
     object TestController extends Ping {
       override val authAction = mockAuthAction
       val config = mockConf
+
+      override protected def mode: Mode = fakeApplication.mode
+
+      override protected def runModeConfiguration: Configuration = fakeApplication.configuration
     }
   }
 
@@ -66,6 +71,9 @@ class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
   "GET /ping" should {
     "return 401 if no creds" in {
       val controller = new Ping {
+        override protected def mode: Mode = fakeApplication.mode
+
+        override protected def runModeConfiguration: Configuration = fakeApplication.configuration
         override val config: Configuration = mockConf
         val bafc2 = new BasicAuthenticationFilterConfiguration("1234", true, "username", "password")
         override val authAction = new BasicAuthenticatedAction(bafc2)

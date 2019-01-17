@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,25 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
-
 import config._
 import models.CompanyRegistrationPost
+import play.api.{Configuration, Play}
+import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
 class CompanyRegistrationConnector extends RegistrationConnector with ServicesConfig {
   lazy val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
   val http: CorePost = WSHttp
+
+  override protected def mode: Mode = Play.current.mode
+
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
 
 trait RegistrationConnector {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package controllers
 
-import javax.inject.Inject
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import com.google.inject.Singleton
-import config.WSHttp
-import play.api.Configuration
+import javax.inject.Inject
+import play.api.Mode.Mode
 import play.api.mvc._
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import scala.concurrent.Future
 
 @Singleton
 class PingImp @Inject() (override val config: Configuration) extends Ping {
@@ -32,6 +31,9 @@ class PingImp @Inject() (override val config: Configuration) extends Ping {
     new BasicAuthenticatedAction(getBasicAuthConfig())
   }
 
+  override protected def mode: Mode = Play.current.mode
+
+  override protected def runModeConfiguration: Configuration = config
 }
 
 trait Ping extends BaseController with ServicesConfig with BasicAuthentication {
@@ -44,5 +46,4 @@ trait Ping extends BaseController with ServicesConfig with BasicAuthentication {
   def auth() = authAction {
     Ok
   }
-
 }

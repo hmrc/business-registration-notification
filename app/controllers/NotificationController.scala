@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import javax.inject.Inject
 
+import javax.inject.Inject
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import models.ETMPNotification
-import play.api.{Configuration, Logger}
+import play.api.{Configuration, Logger, Play}
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -31,11 +31,12 @@ import com.google.inject.Singleton
 import org.joda.time.{DateTime, DateTimeZone}
 import services.{MetricsService, MetricsServiceImp}
 import _root_.util.ServiceDir
-
+import play.api.Mode.Mode
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import uk.gov.hmrc.http.{ NotFoundException, ServiceUnavailableException }
+import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
 
 @Singleton
 class NotificationController @Inject()(val metrics: MetricsServiceImp,
@@ -45,6 +46,10 @@ class NotificationController @Inject()(val metrics: MetricsServiceImp,
   val authAction = {
     new BasicAuthenticatedAction(getBasicAuthConfig())
   }
+
+  override protected def mode: Mode = Play.current.mode
+
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
 
 trait NotificationCtrl extends BaseController {
@@ -123,5 +128,4 @@ trait NotificationCtrl extends BaseController {
           )
         )
     }
-
 }
