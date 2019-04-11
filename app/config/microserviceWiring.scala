@@ -17,9 +17,11 @@
 package config
 
 
+import akka.actor.ActorSystem
 import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
 import config.filters.MicroserviceAuditConnector
+import javax.inject.Inject
 import play.api.{Configuration, Play}
 import play.api.Mode.Mode
 import uk.gov.hmrc.http._
@@ -52,20 +54,9 @@ trait WSHttp extends
   HttpPatch with WSPatch with
   Hooks with AppName
 
-object WSHttp extends WSHttp {
-  override protected def configuration: Option[Config] = Option(Play.current.configuration.underlying)
+class WSHttpImpl @Inject()(val runModeConfiguration: Configuration,val actorSystem: ActorSystem) extends WSHttp {
+  override protected def configuration: Option[Config] = Option(runModeConfiguration.underlying)
 
-  override protected def appNameConfiguration: Configuration = Play.current.configuration
+  override protected def appNameConfiguration: Configuration = runModeConfiguration
 }
 
-object MicroserviceAuthConnector extends AuthConnector with ServicesConfig with WSHttp {
-  override val authBaseUrl = baseUrl("auth")
-
-  override protected def configuration: Option[Config] = Option(Play.current.configuration.underlying)
-
-  override protected def appNameConfiguration: Configuration  = Play.current.configuration
-
-  override protected def mode: Mode = Play.current.mode
-
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-}

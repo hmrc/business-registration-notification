@@ -22,8 +22,8 @@ private object AppDependencies {
 }
 
 object MainDependencies {
-  private val microserviceBootstrapVersion  = "9.1.0"
-  private val domainVersion                 = "5.3.0"
+  private val microserviceBootstrapVersion  = "10.6.0"
+  private val domainVersion                 = "5.6.0-play-25"
 
   def apply() = Seq(
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
@@ -32,7 +32,7 @@ object MainDependencies {
 }
 
 trait TestDependencies {
-  val hmrcTestVersion       = "3.3.0"
+  val hmrcTestVersion       = "3.6.0-play-25"
   val scalaTestVersion      = "3.0.1"
   val scalaTestPlusVersion  = "2.0.0"
   val pegdownVersion        = "1.6.0"

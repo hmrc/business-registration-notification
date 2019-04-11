@@ -29,9 +29,10 @@ import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
-class PAYERegistrationConnector extends PAYERegistrationConnect with ServicesConfig {
+class PAYERegistrationConnector @Inject() (val http: WSHttp)
+
+  extends PAYERegistrationConnect with ServicesConfig {
   lazy val payeRegUrl = s"${baseUrl("paye-registration")}/paye-registration"
-  val http: CorePost = WSHttp
 
   override protected def mode: Mode = Play.current.mode
 
