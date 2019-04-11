@@ -29,9 +29,8 @@ import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
-class CompanyRegistrationConnector extends RegistrationConnector with ServicesConfig {
+class CompanyRegistrationConnector @Inject() (val http: WSHttp) extends RegistrationConnector with ServicesConfig {
   lazy val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
-  val http: CorePost = WSHttp
 
   override protected def mode: Mode = Play.current.mode
 

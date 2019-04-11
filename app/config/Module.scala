@@ -36,5 +36,6 @@ class Module extends AbstractModule {
   private def bindServices() {
     bind(classOf[MetricsService]) to classOf[MetricsServiceImp]
     bind(classOf[RegistrationSrv]) to classOf[RegistrationService]
+    bind(classOf[WSHttp]) to classOf[WSHttpImpl]
   }
 }
