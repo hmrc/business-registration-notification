@@ -32,7 +32,7 @@ object MainDependencies {
 }
 
 trait TestDependencies {
-  val hmrcTestVersion       = "3.6.0-play-25"
+  val hmrcTestVersion       = "3.9.0-play-25"
   val scalaTestVersion      = "3.0.1"
   val scalaTestPlusVersion  = "2.0.0"
   val pegdownVersion        = "1.6.0"
