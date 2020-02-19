@@ -13,27 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package itutil
 
-import org.scalatest._
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatestplus.play.OneServerPerSuite
+package test
 
-trait IntegrationSpecBase extends WordSpec
-  with OneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
-  with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll {
+import org.scalatest.{Matchers, WordSpec}
 
-  override def beforeEach() = {
-    resetWiremock()
-  }
-
-  override def beforeAll() = {
-    super.beforeAll()
-    startWiremock()
-  }
-
-  override def afterAll() = {
-    stopWiremock()
-    super.afterAll()
-  }
-}
+trait UnitSpec extends WordSpec with Matchers { }

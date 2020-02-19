@@ -18,19 +18,20 @@ package processors
 
 import config.MicroserviceAuditConnector
 import models.ETMPNotification
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
+import play.api.test.Helpers._
 import services.RegistrationService
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import play.api.test.Helpers.OK
+import test.UnitSpec
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.HeaderCarrier
 
-class CTProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+class CTProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   val mockAuditConnector = mock[MicroserviceAuditConnector]
   val mockRegistratioService = mock[RegistrationService]

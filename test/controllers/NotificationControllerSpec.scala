@@ -21,22 +21,23 @@ import akka.stream.ActorMaterializer
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import com.codahale.metrics.Counter
 import models.ETMPNotification
-import org.scalatest.mockito.MockitoSugar
-import services.MetricsService
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import util.ServiceDir
 import play.api.test.Helpers._
+import services.MetricsService
+import test.UnitSpec
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import util.ServiceDir
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException }
 
-class NotificationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+class NotificationControllerSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   val mockDirector = mock[ServiceDir]
   val mockMetrics = mock[MetricsService]
@@ -54,11 +55,8 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
     "04"
   )
 
-
-
   val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
   val mockAuthAction = new BasicAuthenticatedAction(bafc)
-
 
   class Setup {
     object TestController extends NotificationCtrl {
@@ -75,11 +73,8 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
       val authAction = mockAuthAction
       val config = mockConf
       val auditConnector = mockAuditConnector
-
     }
   }
-
-
 
   "processNotification" should {
     "return an BADREQUEST" when {
@@ -89,7 +84,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
         .thenReturn(Future.successful(OK))
 
         val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data))
-        val result = await(TestController.processNotification("testAckRef")(request))
+        val result = TestController.processNotification("testAckRef")(request)
         status(result) shouldBe BAD_REQUEST
       }
 
@@ -100,7 +95,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
         when(mockDirector.goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some(""))))(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        val result = await(TestController.processNotification("testAckRef")(request))
+        val result = TestController.processNotification("testAckRef")(request)
         status(result) shouldBe BAD_REQUEST
       }
     }
@@ -114,7 +109,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
                 .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
                 .thenReturn(Future.successful(OK))
 
-              val result = await(TestController.processNotification("testAckRef")(request))
+              val result = TestController.processNotification("testAckRef")(request)
               status(result) shouldBe OK
             }
           }
@@ -126,7 +121,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
               .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.successful(CONTINUE))
 
-            val result = await(TestController.processNotification("testAckRef")(request))
+            val result = TestController.processNotification("testAckRef")(request)
             status(result) shouldBe CONTINUE
           }
 
@@ -137,7 +132,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
               .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.failed(new NotFoundException("")))
 
-            val result = await(TestController.processNotification("testAckRef")(request))
+            val result = TestController.processNotification("testAckRef")(request)
             status(result) shouldBe NOT_FOUND
           }
 
@@ -148,7 +143,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
               .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.failed(new ServiceUnavailableException("")))
 
-            val result = await(TestController.processNotification("testAckRef")(request))
+            val result = TestController.processNotification("testAckRef")(request)
             status(result) shouldBe SERVICE_UNAVAILABLE
           }
 
@@ -159,7 +154,7 @@ class NotificationControllerSpec extends UnitSpec with WithFakeApplication with 
               .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
               .thenReturn(Future.failed(new InternalServerException("")))
 
-            val result = await(TestController.processNotification("testAckRef")(request))
+            val result = TestController.processNotification("testAckRef")(request)
             status(result) shouldBe INTERNAL_SERVER_ERROR
           }
     }

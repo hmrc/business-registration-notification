@@ -19,24 +19,23 @@ package controllers
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import javax.inject.Inject
+import _root_.util.{ServiceDir, ServiceDirector}
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
+import com.google.inject.Singleton
+import javax.inject.Inject
 import models.ETMPNotification
-import play.api.{Configuration, Logger, Play}
+import org.joda.time.{DateTime, DateTimeZone}
+import play.api.Mode.Mode
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import _root_.util.ServiceDirector
-import com.google.inject.Singleton
-import org.joda.time.{DateTime, DateTimeZone}
+import play.api.{Configuration, Logger, Play}
 import services.{MetricsService, MetricsServiceImp}
-import _root_.util.ServiceDir
-import play.api.Mode.Mode
+import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
 
 @Singleton
 class NotificationController @Inject()(val metrics: MetricsServiceImp,

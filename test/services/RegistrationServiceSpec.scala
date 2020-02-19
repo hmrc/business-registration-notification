@@ -20,16 +20,17 @@ import config.WSHttp
 import connectors.{CompanyRegistrationConnector, PAYERegistrationConnector}
 import mocks.MockHttp
 import models.{CompanyRegistrationPost, PAYERegistrationPost}
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import play.api.test.Helpers.OK
-import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers
-
-import scala.concurrent.Future
+import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.test.Helpers._
+import test.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
 
-class RegistrationServiceSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
+import scala.concurrent.Future
+
+class RegistrationServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
 
   val mockCRConnector = mock[CompanyRegistrationConnector]
   val mockPAYEConnector = mock[PAYERegistrationConnector]

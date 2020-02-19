@@ -18,7 +18,7 @@ package models
 
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
-import uk.gov.hmrc.play.test.UnitSpec
+import test.UnitSpec
 
 class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 

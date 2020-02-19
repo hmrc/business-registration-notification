@@ -16,14 +16,13 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
-
 import connectors.{CompanyRegistrationConnector, PAYERegistrationConnector}
+import javax.inject.{Inject, Singleton}
 import models.{CompanyRegistrationPost, PAYERegistrationPost}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class RegistrationService @Inject() (companyRegistrationConnector: CompanyRegistrationConnector,

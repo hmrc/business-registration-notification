@@ -18,19 +18,16 @@ package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import config.WSHttp
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.Mode.Mode
 import play.api.http.Status
 import play.api.test.Helpers._
 import play.api.test.{FakeApplication, FakeRequest}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import test.UnitSpec
 
-import scala.concurrent.Future
-
-
-class PingSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+class PingSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   val testUserName = "foo"
   val testPassword = "bar"

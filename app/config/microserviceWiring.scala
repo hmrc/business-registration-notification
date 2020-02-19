@@ -18,19 +18,17 @@ package config
 
 
 import akka.actor.ActorSystem
-import com.google.inject.ImplementedBy
 import com.typesafe.config.Config
 import config.filters.MicroserviceAuditConnector
 import javax.inject.Inject
-import play.api.{Configuration, Play}
 import play.api.Mode.Mode
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
-import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
-import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.audit.http.HttpAuditing
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.config.{AppName, RunMode}
+import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
 class MicroserviceAuditConnector extends AuditConnector with RunMode {

@@ -1,12 +1,10 @@
 
-import TestPhases.oneForkedJvmPerTest
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings, integrationTestSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, integrationTestSettings, scalaSettings}
+import uk.gov.hmrc.{SbtArtifactory, SbtAutoBuildPlugin}
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning
-import uk.gov.hmrc.SbtArtifactory
-import uk.gov.hmrc.SbtAutoBuildPlugin
+import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "business-registration-notification"
 

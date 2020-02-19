@@ -16,9 +16,8 @@
 
 package audit.events
 
-import play.api.libs.json.Writes
 import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.{Writes, _}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 case class ProcessedNotificationEventDetail(acknowledgementReference : String,

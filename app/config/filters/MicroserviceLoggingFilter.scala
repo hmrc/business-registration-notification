@@ -17,7 +17,7 @@
 package config.filters
 
 import javax.inject.Inject
-import uk.gov.hmrc.play.microservice.filters.{ LoggingFilter, MicroserviceFilterSupport }
+import uk.gov.hmrc.play.microservice.filters.{LoggingFilter, MicroserviceFilterSupport}
 
 /**
   * Created by jackie on 08/02/17.

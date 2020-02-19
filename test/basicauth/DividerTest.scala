@@ -16,13 +16,13 @@
 
 package basicauth
 
-import org.scalatest.FunSuite
+import test.UnitSpec
 import util.Divider
 
-class DividerTest extends FunSuite {
+class DividerTest extends UnitSpec {
   import Divider.IDivider
 
-  test("divide") {
+  "divide" in {
     assert("".divide('|') === List(""))
     assert("xx".divide('|') === List("xx"))
     assert("xx|".divide('|') === List("xx", ""))
@@ -31,7 +31,7 @@ class DividerTest extends FunSuite {
     assert("xx|yy|zz".divide('|') === List("xx", "yy|zz"))
   }
 
-  test("divideLast") {
+  "divideLast" in {
     assert("".divideLast('|') === List(""))
     assert("xx".divideLast('|') === List("xx"))
     assert("xx|".divideLast('|') === List("xx", ""))

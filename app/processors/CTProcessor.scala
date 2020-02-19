@@ -16,17 +16,16 @@
 
 package processors
 
-import javax.inject.{Inject, Singleton}
-
 import audit.builders.AuditBuilding
 import audit.events.ProcessedNotificationEvent
 import config.MicroserviceAuditConnector
+import javax.inject.{Inject, Singleton}
 import models.{CompanyRegistrationPost, ETMPNotification}
 import services.RegistrationService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class CTProcessor @Inject()(
