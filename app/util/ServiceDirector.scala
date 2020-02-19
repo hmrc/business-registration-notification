@@ -16,15 +16,14 @@
 
 package util
 
-import javax.inject.{Inject, Singleton}
-
 import config.Regimes
+import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import play.api.Logger
 import processors.{CTProcessor, PAYEProcessor, RegimeProcessor}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class ServiceDirector @Inject()(payeRegimeProcessor: PAYEProcessor,

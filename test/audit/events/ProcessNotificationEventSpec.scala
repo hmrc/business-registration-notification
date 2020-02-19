@@ -17,7 +17,7 @@
 package audit.events
 
 import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.play.test.UnitSpec
+import test.UnitSpec
 
 class ProcessNotificationEventSpec extends UnitSpec {
 

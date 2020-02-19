@@ -18,9 +18,9 @@ package processors
 
 import models.ETMPNotification
 import play.api.Logger
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 trait RegimeProcessor {
 

@@ -16,9 +16,9 @@
 
 package models
 
-import play.api.libs.json.{Format, Reads, Writes}
-import Reads.{maxLength, minLength, pattern}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads.{maxLength, minLength, pattern}
+import play.api.libs.json.{Format, Reads, Writes}
 
 
 object Validation {

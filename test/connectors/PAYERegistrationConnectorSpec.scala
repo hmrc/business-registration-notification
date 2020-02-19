@@ -22,14 +22,15 @@ import models.PAYERegistrationPost
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.{JsValue, Json, Writes}
-import play.api.test.Helpers.OK
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-
-import scala.concurrent.{ExecutionContext, Future}
+import play.api.test.Helpers._
+import test.UnitSpec
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 
-class PAYERegistrationConnectorSpec extends UnitSpec with WithFakeApplication with MockitoSugar with MockHttp {
+import scala.concurrent.{ExecutionContext, Future}
+
+class PAYERegistrationConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
   val mockHttp = mock[WSHttp]
 
   val successResponse = mockHttpResponse(OK)

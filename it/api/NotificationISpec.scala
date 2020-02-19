@@ -23,7 +23,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WS
 import util.BasicBase64
-import play.api.{Logger => TestLogger}
 
 class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 

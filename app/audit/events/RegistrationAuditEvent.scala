@@ -16,10 +16,9 @@
 
 package audit.events
 
+import audit.events.RegistrationAuditEvent.buildTags
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-
-import RegistrationAuditEvent.buildTags
 
 abstract class RegistrationAuditEvent(auditType: String, detail: JsObject, transactionName: Option[String])
   extends ExtendedDataEvent(

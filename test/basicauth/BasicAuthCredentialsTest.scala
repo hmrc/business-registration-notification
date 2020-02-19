@@ -16,16 +16,16 @@
 
 package basicauth
 
-import org.scalatest.FunSuite
+import test.UnitSpec
 
-class BasicAuthCredentialsTest extends FunSuite {
+class BasicAuthCredentialsTest extends UnitSpec {
 
-  test("conversion of a known value succeeds correctly") {
+  "conversion of a known value succeeds correctly" in {
     val creds = BasicAuthCredentials.fromAuthorizationHeader(Some("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="))
     assert(creds === Some(BasicAuthCredentials("Aladdin", "open sesame")))
   }
 
-  test("round-trip conversion succeeds correctly") {
+  "round-trip conversion succeeds correctly" in {
     val creds1 = BasicAuthCredentials("Aladdin", "open sesame")
     assert(BasicAuthCredentials.fromBase64(creds1.toBase64) === Some(creds1))
     val creds2 = BasicAuthCredentials("", "")

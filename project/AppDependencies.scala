@@ -32,19 +32,15 @@ object MainDependencies {
 }
 
 trait TestDependencies {
-  val hmrcTestVersion       = "3.9.0-play-25"
-  val scalaTestVersion      = "3.0.1"
-  val scalaTestPlusVersion  = "2.0.0"
+  val scalaTestPlusVersion  = "2.0.1"
   val pegdownVersion        = "1.6.0"
   val mockitoCoreVersion    = "2.13.0"
-  val wiremockVersion       = "2.6.0"
+  val wiremockVersion       = "2.26.0"
 
   val scope: Configuration
   val test: Seq[ModuleID]
 
   lazy val coreTestDependencies = Seq(
-    "uk.gov.hmrc"             %%  "hmrctest"            % hmrcTestVersion       % scope,
-    "org.scalatest"           %%  "scalatest"           % scalaTestVersion      % scope,
     "org.scalatestplus.play"  %%  "scalatestplus-play"  % scalaTestPlusVersion  % scope,
     "org.pegdown"             %   "pegdown"             % pegdownVersion        % scope,
     "com.typesafe.play"       %%  "play-test"           % PlayVersion.current   % scope
@@ -62,7 +58,7 @@ object UnitTestDependencies extends TestDependencies {
 object IntegrationTestDependencies extends TestDependencies {
   override val scope = IntegrationTest
   override val test  =  coreTestDependencies ++ Seq(
-    "com.github.tomakehurst"  %  "wiremock" % wiremockVersion  % scope
+    "com.github.tomakehurst"  %  "wiremock-jre8" % wiremockVersion  % scope
   )
 
   def apply() = test

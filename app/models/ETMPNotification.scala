@@ -16,8 +16,8 @@
 
 package models
 
-import play.api.libs.json.{Json, __}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{Json, __}
 
 case class ETMPNotification(timestamp : String,
                             regime : String,

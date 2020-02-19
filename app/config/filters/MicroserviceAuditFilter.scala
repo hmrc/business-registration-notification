@@ -16,10 +16,10 @@
 
 package config.filters
 
-import javax.inject.Inject
 import akka.stream.Materializer
-import play.api.{Configuration, Play}
+import javax.inject.Inject
 import play.api.Mode.Mode
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.RunMode
 import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig

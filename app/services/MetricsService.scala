@@ -16,9 +16,9 @@
 
 package services
 
-import javax.inject.{Singleton,Inject}
 import com.codahale.metrics.Counter
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{Inject, Singleton}
 
 /**
   * Created by jackie on 09/02/17.

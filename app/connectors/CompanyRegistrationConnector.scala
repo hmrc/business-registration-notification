@@ -16,17 +16,17 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
 import config._
+import javax.inject.{Inject, Singleton}
 import models.CompanyRegistrationPost
-import play.api.{Configuration, Play}
 import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
+import play.api.{Configuration, Play}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
 class CompanyRegistrationConnector @Inject() (val http: WSHttp) extends RegistrationConnector with ServicesConfig {

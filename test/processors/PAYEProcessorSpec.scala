@@ -21,15 +21,16 @@ import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
-import play.api.test.Helpers.OK
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.test.Helpers._
 import services.RegistrationService
+import test.UnitSpec
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.HeaderCarrier
 
-class PAYEProcessorSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+class PAYEProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   val mockAuditConnector = mock[MicroserviceAuditConnector]
   val mockRegistratioService = mock[RegistrationService]
