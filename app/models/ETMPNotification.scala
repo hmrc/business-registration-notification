@@ -19,23 +19,23 @@ package models
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Json, __}
 
-case class ETMPNotification(timestamp : String,
-                            regime : String,
+case class ETMPNotification(timestamp: String,
+                            regime: String,
                             taxId: Option[String],
-                            status : String)
+                            status: String)
 
 object ETMPNotification extends NotificationValidator {
   implicit val format = (
     (__ \ "timestamp").format[String](isoDateValidator) and
-    (__ \ "regime").format[String](regimeValidator) and
-    (__ \ "business-tax-identifier").formatNullable[String](taxIdentifierValidator) and
-    (__ \ "status").format[String](statusValidator)
-  )(ETMPNotification.apply, unlift(ETMPNotification.unapply))
+      (__ \ "regime").format[String](regimeValidator) and
+      (__ \ "business-tax-identifier").formatNullable[String](taxIdentifierValidator) and
+      (__ \ "status").format[String](statusValidator)
+    ) (ETMPNotification.apply, unlift(ETMPNotification.unapply))
 }
 
-case class CompanyRegistrationPost(ctUtr : Option[String],
-                                   timestamp : String,
-                                   status : String)
+case class CompanyRegistrationPost(ctUtr: Option[String],
+                                   timestamp: String,
+                                   status: String)
 
 object CompanyRegistrationPost {
   implicit val format = Json.format[CompanyRegistrationPost]

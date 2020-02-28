@@ -16,33 +16,28 @@
 
 package connectors
 
-import config._
 import javax.inject.{Inject, Singleton}
 import models.CompanyRegistrationPost
 import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Configuration, Play}
-import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 @Singleton
-class CompanyRegistrationConnector @Inject() (val http: WSHttp) extends RegistrationConnector with ServicesConfig {
+class CompanyRegistrationConnector @Inject()(http: HttpClient) extends ServicesConfig {
+
   lazy val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
 
   override protected def mode: Mode = Play.current.mode
 
   override protected def runModeConfiguration: Configuration = Play.current.configuration
-}
 
-trait RegistrationConnector {
-
-  val companyRegUrl : String
-  val http : CorePost
-
-  def processAcknowledgment(ackRef : String, crPost : CompanyRegistrationPost)(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
+  def processAcknowledgment(ackRef: String, crPost: CompanyRegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val json = Json.toJson(crPost)
     http.POST[JsValue, HttpResponse](s"$companyRegUrl/corporation-tax-registration/acknowledgement-confirmation?ackref=$ackRef", json)
   }

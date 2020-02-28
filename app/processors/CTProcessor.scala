@@ -18,20 +18,19 @@ package processors
 
 import audit.builders.AuditBuilding
 import audit.events.ProcessedNotificationEvent
-import config.MicroserviceAuditConnector
 import javax.inject.{Inject, Singleton}
 import models.{CompanyRegistrationPost, ETMPNotification}
-import services.RegistrationService
+import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 @Singleton
-class CTProcessor @Inject()(
-                             auditConnector: MicroserviceAuditConnector,
-                             registrationService: RegistrationService
-                             ) extends RegimeProcessor with AuditBuilding {
+class CTProcessor @Inject()(auditConnector: AuditConnector,
+                            registrationService: CompanyRegistrationService)
+  extends RegimeProcessor with AuditBuilding {
 
   private[processors] def notificationToCRPost(notification: ETMPNotification): CompanyRegistrationPost = {
     CompanyRegistrationPost(notification.taxId, notification.timestamp, notification.status)

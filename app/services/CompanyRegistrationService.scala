@@ -25,23 +25,15 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
-class RegistrationService @Inject() (companyRegistrationConnector: CompanyRegistrationConnector,
-                                     payeRegistrationConnector: PAYERegistrationConnector) extends RegistrationSrv {
+class CompanyRegistrationService @Inject()(companyRegistrationConnector: CompanyRegistrationConnector,
+                                           payeRegistrationConnector: PAYERegistrationConnector) {
 
-  val crConnector = companyRegistrationConnector
-  val payeConnector = payeRegistrationConnector
-}
-
-trait RegistrationSrv {
-
-  val crConnector: CompanyRegistrationConnector
-  val payeConnector: PAYERegistrationConnector
 
   def sendToCompanyRegistration(ackRef: String, crPost: CompanyRegistrationPost)(implicit hc: HeaderCarrier): Future[Int] = {
-    crConnector.processAcknowledgment(ackRef, crPost) map (_.status)
+    companyRegistrationConnector.processAcknowledgment(ackRef, crPost) map (_.status)
   }
 
   def sendToPAYERegistration(ackRef: String, payePost: PAYERegistrationPost)(implicit hc: HeaderCarrier): Future[Int] = {
-    payeConnector.processAcknowledgement(ackRef, payePost) map (_.status)
+    payeRegistrationConnector.processAcknowledgement(ackRef, payePost) map (_.status)
   }
 }

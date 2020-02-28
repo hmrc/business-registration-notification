@@ -23,13 +23,16 @@ import play.api.libs.json.{Format, Reads, Writes}
 
 object Validation {
 
-  def length(maxLen:Int, minLen: Int = 1): Reads[String] = maxLength[String](maxLen) keepAnd minLength[String](minLen)
-  def readToFmt(rds:Reads[String])(implicit wts:Writes[String]): Format[String] = Format(rds,wts)
-  def lengthFmt(maxLen:Int, minLen: Int = 1): Format[String] = readToFmt(length(maxLen, minLen))
+  def length(maxLen: Int, minLen: Int = 1): Reads[String] = maxLength[String](maxLen) keepAnd minLength[String](minLen)
+
+  def readToFmt(rds: Reads[String])(implicit wts: Writes[String]): Format[String] = Format(rds, wts)
+
+  def lengthFmt(maxLen: Int, minLen: Int = 1): Format[String] = readToFmt(length(maxLen, minLen))
 
 }
 
 trait NotificationValidator {
+
   import Validation.lengthFmt
 
   val taxIdentifierValidator = lengthFmt(15) // scalastyle:ignore magic.number

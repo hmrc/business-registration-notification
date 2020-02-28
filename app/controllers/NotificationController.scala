@@ -19,47 +19,35 @@ package controllers
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import _root_.util.{ServiceDir, ServiceDirector}
+import _root_.util.ServiceDirector
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
-import com.google.inject.Singleton
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Mode.Mode
 import play.api.libs.json._
 import play.api.mvc.{Action, Request, Result}
 import play.api.{Configuration, Logger, Play}
-import services.{MetricsService, MetricsServiceImp}
+import services.MetricsService
 import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class NotificationController @Inject()(val metrics: MetricsServiceImp,
-                                       override val config: Configuration,
-                                       val director: ServiceDirector) extends NotificationCtrl with BasicAuthentication {
-
-  val authAction = {
-    new BasicAuthenticatedAction(getBasicAuthConfig())
-  }
+class NotificationController @Inject()(val metrics: MetricsService,
+                                       val config: Configuration,
+                                       director: ServiceDirector) extends BaseController with BasicAuthentication {
 
   override protected def mode: Mode = Play.current.mode
 
   override protected def runModeConfiguration: Configuration = Play.current.configuration
-}
 
-trait NotificationCtrl extends BaseController {
+  val authAction = new BasicAuthenticatedAction(getBasicAuthConfig())
 
-  val config : Configuration
-
-  val director : ServiceDir
-  val metrics : MetricsService
-  val authAction : BasicAuthenticatedAction
-
-  def processNotification(ackRef : String) : Action[JsValue] = authAction.async[JsValue](parse.json) {
+  def processNotification(ackRef: String): Action[JsValue] = authAction.async[JsValue](parse.json) {
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
@@ -78,12 +66,12 @@ trait NotificationCtrl extends BaseController {
               metrics.ackRefNotFound.inc(1)
               metrics.clientErrorCodes.inc(1)
               NotFound(buildFailureResponse(notif.timestamp, Some("Acknowledgement reference not found")))
-            case ex : ServiceUnavailableException =>
+            case ex: ServiceUnavailableException =>
               Logger.error(s"SERVICE UNAVAILABLE : ${ex}")
               metrics.serviceNotAvailable.inc(1)
               metrics.serverErrorCodes.inc(1)
               ServiceUnavailable(buildFailureResponse(notif.timestamp))
-            case ex  => {
+            case ex => {
               Logger.error(s"INTERNAL SERVER ERROR : ${ex}")
               metrics.internalServerError.inc(1)
               metrics.serverErrorCodes.inc(1)
@@ -101,7 +89,7 @@ trait NotificationCtrl extends BaseController {
     }
   }
 
-  def timestampNow() : String = {
+  def timestampNow(): String = {
     val timeStampFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
     val format: SimpleDateFormat = new SimpleDateFormat(timeStampFormat)
     format.format(new Date(DateTime.now(DateTimeZone.UTC).getMillis))

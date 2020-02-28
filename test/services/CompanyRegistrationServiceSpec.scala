@@ -16,7 +16,6 @@
 
 package services
 
-import config.WSHttp
 import connectors.{CompanyRegistrationConnector, PAYERegistrationConnector}
 import mocks.MockHttp
 import models.{CompanyRegistrationPost, PAYERegistrationPost}
@@ -30,21 +29,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class RegistrationServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
+class CompanyRegistrationServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
 
   val mockCRConnector = mock[CompanyRegistrationConnector]
   val mockPAYEConnector = mock[PAYERegistrationConnector]
-  val mockWSHttp = mock[WSHttp]
 
   val response = mockHttpResponse(OK)
 
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    val testService = new RegistrationSrv {
-      override val crConnector = mockCRConnector
-      override val payeConnector = mockPAYEConnector
-    }
+    val testService = new CompanyRegistrationService(mockCRConnector, mockPAYEConnector)
   }
 
   "sendToCompanyRegistration" should {

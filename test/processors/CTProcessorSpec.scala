@@ -16,7 +16,6 @@
 
 package processors
 
-import config.MicroserviceAuditConnector
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
@@ -24,17 +23,18 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import services.RegistrationService
+import services.CompanyRegistrationService
 import test.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CTProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
-  val mockAuditConnector = mock[MicroserviceAuditConnector]
-  val mockRegistratioService = mock[RegistrationService]
+  val mockAuditConnector = mock[AuditConnector]
+  val mockCompanyRegistratioService = mock[CompanyRegistrationService]
 
   val testEtmpNotification =
     ETMPNotification(
@@ -58,7 +58,7 @@ class CTProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
   implicit val hc = HeaderCarrier()
 
   class Setup {
-    val testProcessor = new CTProcessor(mockAuditConnector, mockRegistratioService)
+    val testProcessor = new CTProcessor(mockAuditConnector, mockCompanyRegistratioService)
   }
 
   "notificationToCRPost" should {
@@ -77,7 +77,7 @@ class CTProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
-        when(mockRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
         val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
@@ -88,7 +88,7 @@ class CTProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.successful(Success))
 
-        when(mockRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
         val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))

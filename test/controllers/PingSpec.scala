@@ -17,7 +17,6 @@
 package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
-import config.WSHttp
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
@@ -39,23 +38,23 @@ class PingSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
     "Test.basicAuthentication.password" -> testPassword
   ))
 
-  val mockConf = mock[Configuration]
-  val mockWSHttp = mock[WSHttp]
+  val mockConf = app.injector.instanceOf[Configuration]
+
+  val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
+  val mockAuthAction = new BasicAuthenticatedAction(bafc)
+  val authAction = mockAuthAction
 
   class Setup {
-    object TestController extends Ping {
+
+    object TestController extends Ping(mockConf) {
       override val authAction = mockAuthAction
-      val config = mockConf
 
       override protected def mode: Mode = fakeApplication.mode
 
       override protected def runModeConfiguration: Configuration = fakeApplication.configuration
     }
-  }
 
-  val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
-  val mockAuthAction = new BasicAuthenticatedAction(bafc)
-  val authAction = mockAuthAction
+  }
 
   "GET /ping/noauth" should {
     "return 200" in new Setup {
@@ -67,11 +66,11 @@ class PingSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   "GET /ping" should {
     "return 401 if no creds" in {
-      val controller = new Ping {
+      val controller = new Ping(mockConf) {
         override protected def mode: Mode = fakeApplication.mode
 
         override protected def runModeConfiguration: Configuration = fakeApplication.configuration
-        override val config: Configuration = mockConf
+
         val bafc2 = new BasicAuthenticationFilterConfiguration("1234", true, "username", "password")
         override val authAction = new BasicAuthenticatedAction(bafc2)
       }
@@ -81,7 +80,7 @@ class PingSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
     }
 
     "return 200 if the username and password match the config" in new Setup {
-      val fakeRequest = FakeRequest("GET", "/ping").withHeaders("Authorization"->"Basic Zm9vOmJhcg==")
+      val fakeRequest = FakeRequest("GET", "/ping").withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
       val result = TestController.auth()(fakeRequest)
       status(result) shouldBe Status.OK
     }
