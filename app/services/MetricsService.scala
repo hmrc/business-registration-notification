@@ -20,31 +20,16 @@ import com.codahale.metrics.Counter
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 
-/**
-  * Created by jackie on 09/02/17.
-  */
 @Singleton
-class MetricsServiceImp @Inject() (val metricsInstance: Metrics) extends MetricsService {
-  val metrics = metricsInstance
+class MetricsService @Inject()(val metricsInstance: Metrics) {
 
-  val etmpNotificationCounter : Counter = metrics.defaultRegistry.counter("etmp-notification-counter")
+  val etmpNotificationCounter: Counter = metricsInstance.defaultRegistry.counter("etmp-notification-counter")
 
-  val ackRefNotFound : Counter = metrics.defaultRegistry.counter("ack-ref-not-found")
-  val serviceNotAvailable : Counter = metrics.defaultRegistry.counter("service-not-available")
-  val internalServerError : Counter = metrics.defaultRegistry.counter("internal-server-error")
+  val ackRefNotFound: Counter = metricsInstance.defaultRegistry.counter("ack-ref-not-found")
+  val serviceNotAvailable: Counter = metricsInstance.defaultRegistry.counter("service-not-available")
+  val internalServerError: Counter = metricsInstance.defaultRegistry.counter("internal-server-error")
 
-  val clientErrorCodes : Counter = metrics.defaultRegistry.counter("client-error-codes")
-  val serverErrorCodes : Counter = metrics.defaultRegistry.counter("server-error-codes")
+  val clientErrorCodes: Counter = metricsInstance.defaultRegistry.counter("client-error-codes")
+  val serverErrorCodes: Counter = metricsInstance.defaultRegistry.counter("server-error-codes")
 
-}
-
-trait MetricsService {
-  val etmpNotificationCounter : Counter
-
-  val ackRefNotFound : Counter
-  val serviceNotAvailable : Counter
-  val internalServerError : Counter
-
-  val clientErrorCodes : Counter
-  val serverErrorCodes : Counter
 }

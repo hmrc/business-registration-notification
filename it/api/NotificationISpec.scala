@@ -31,8 +31,8 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
   val mockUrl = s"http://$mockHost:$mockPort"
 
   val additionalConfiguration = Map(
-    "auditing.consumer.baseUri.host" -> s"$mockHost",
-    "auditing.consumer.baseUri.port" -> s"$mockPort",
+    "Test.auditing.consumer.baseUri.host" -> s"$mockHost",
+    "Test.auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.auth.host" -> s"$mockHost",
     "microservice.services.auth.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
@@ -81,10 +81,9 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
         .withQueryParam("ackref", equalTo("BRCT0001"))
         .withRequestBody(equalToJson(jsonCR))
         .willReturn(
-          aResponse().
-            withStatus(200).
-            withBody(jsonCR)
-        )
+          aResponse()
+            .withStatus(200)
+            .withBody(jsonCR))
       )
 
       val response = client(s"/notification/BRCT0001").

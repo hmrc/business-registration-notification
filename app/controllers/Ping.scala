@@ -17,33 +17,26 @@
 package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
-import com.google.inject.Singleton
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.Mode.Mode
 import play.api.mvc._
 import play.api.{Configuration, Play}
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.microservice.controller.BaseController
 
 @Singleton
-class PingImp @Inject() (override val config: Configuration) extends Ping {
-  val authAction: ActionBuilder[Request] = {
-    new BasicAuthenticatedAction(getBasicAuthConfig())
-  }
+class Ping @Inject()(val config: Configuration) extends BaseController with ServicesConfig with BasicAuthentication {
+  val authAction: ActionBuilder[Request] = new BasicAuthenticatedAction(getBasicAuthConfig())
 
   override protected def mode: Mode = Play.current.mode
 
   override protected def runModeConfiguration: Configuration = config
-}
 
-trait Ping extends BaseController with ServicesConfig with BasicAuthentication {
-  val authAction: ActionBuilder[Request]
-
-  def noAuth() = Action {
+  def noAuth(): Action[AnyContent] = Action {
     Ok
   }
 
-  def auth() = authAction {
+  def auth(): Action[AnyContent] = authAction {
     Ok
   }
 }

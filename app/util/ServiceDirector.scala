@@ -20,28 +20,19 @@ import config.Regimes
 import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import play.api.Logger
-import processors.{CTProcessor, PAYEProcessor, RegimeProcessor}
+import processors.{CTProcessor, PAYEProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 @Singleton
-class ServiceDirector @Inject()(payeRegimeProcessor: PAYEProcessor,
-                                ctRegimeProcessor: CTProcessor) extends ServiceDir {
+class ServiceDirector @Inject()(val payeRegimeProcessor: PAYEProcessor,
+                                val ctRegimeProcessor: CTProcessor) extends Regimes {
 
-  val payeProcessor = payeRegimeProcessor
-  val ctProcessor = ctRegimeProcessor
-}
-
-trait ServiceDir extends Regimes {
-
-  val payeProcessor: RegimeProcessor
-  val ctProcessor: RegimeProcessor
-
-  def goToService(ackRef : String, regime : String, data : ETMPNotification)(implicit hc : HeaderCarrier) : Future[Int] = {
+  def goToService(ackRef: String, regime: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
     regime match {
-      case CORPORATION_TAX => ctProcessor.processRegime(ackRef, data)
-      case PAYE => payeProcessor.processRegime(ackRef, data)
+      case CORPORATION_TAX => ctRegimeProcessor.processRegime(ackRef, data)
+      case PAYE => payeRegimeProcessor.processRegime(ackRef, data)
       case _ =>
         Logger.info(s"[ServiceDirector] - [goToService] : An unsupported tax regime was presented")
         Future.successful(INVALID_REGIME)

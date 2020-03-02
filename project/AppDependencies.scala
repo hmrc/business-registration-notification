@@ -22,43 +22,44 @@ private object AppDependencies {
 }
 
 object MainDependencies {
-  private val microserviceBootstrapVersion  = "10.6.0"
-  private val domainVersion                 = "5.6.0-play-25"
+  private val bootstrapPlay = "5.1.0"
+  private val domainVersion = "5.6.0-play-25"
 
   def apply() = Seq(
-    "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
-    "uk.gov.hmrc" %% "domain"                 % domainVersion
+    "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapPlay,
+    "uk.gov.hmrc" %% "domain" % domainVersion
   )
 }
 
 trait TestDependencies {
-  val scalaTestPlusVersion  = "2.0.1"
-  val pegdownVersion        = "1.6.0"
-  val mockitoCoreVersion    = "2.13.0"
-  val wiremockVersion       = "2.26.0"
+  val scalaTestPlusVersion = "2.0.1"
+  val pegdownVersion = "1.6.0"
+  val mockitoCoreVersion = "3.3.0"
+  val wiremockVersion = "2.26.0"
 
   val scope: Configuration
   val test: Seq[ModuleID]
 
   lazy val coreTestDependencies = Seq(
-    "org.scalatestplus.play"  %%  "scalatestplus-play"  % scalaTestPlusVersion  % scope,
-    "org.pegdown"             %   "pegdown"             % pegdownVersion        % scope,
-    "com.typesafe.play"       %%  "play-test"           % PlayVersion.current   % scope
+    "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
+    "org.pegdown" % "pegdown" % pegdownVersion % scope,
+    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
   )
 }
 
 object UnitTestDependencies extends TestDependencies {
   override val scope = Test
-  override val test  = coreTestDependencies ++ Seq(
+  override val test = coreTestDependencies ++ Seq(
     "org.mockito" % "mockito-core" % mockitoCoreVersion
   )
+
   def apply() = test
 }
 
 object IntegrationTestDependencies extends TestDependencies {
   override val scope = IntegrationTest
-  override val test  =  coreTestDependencies ++ Seq(
-    "com.github.tomakehurst"  %  "wiremock-jre8" % wiremockVersion  % scope
+  override val test = coreTestDependencies ++ Seq(
+    "com.github.tomakehurst" % "wiremock-jre8" % wiremockVersion % scope
   )
 
   def apply() = test

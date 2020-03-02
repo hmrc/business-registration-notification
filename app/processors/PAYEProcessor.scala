@@ -18,28 +18,29 @@ package processors
 
 import audit.builders.AuditBuilding
 import audit.events.ProcessedNotificationEvent
-import config.MicroserviceAuditConnector
 import constants.Outcome
 import javax.inject.{Inject, Singleton}
 import models.{ETMPNotification, PAYERegistrationPost}
-import services.RegistrationService
+import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 @Singleton
-class PAYEProcessor @Inject()(
-                               auditConnector: MicroserviceAuditConnector,
-                               registrationService: RegistrationService
-                               ) extends RegimeProcessor with AuditBuilding {
+class PAYEProcessor @Inject()(auditConnector: AuditConnector,
+                              registrationService: CompanyRegistrationService)
+  extends RegimeProcessor with AuditBuilding {
 
   private[processors] def notificationToPAYEPost(notification: ETMPNotification): PAYERegistrationPost = {
     PAYERegistrationPost(notification.taxId, notification.timestamp, notification.status)
   }
 
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
-    val auditRef = if(Outcome.successfulOutcome(data)) "successfulTaxServiceRegistration" else "rejectedTaxServiceRegistration"
+
+    val auditRef = if (Outcome.successfulOutcome(data)) "successfulTaxServiceRegistration" else "rejectedTaxServiceRegistration"
+
     auditConnector.sendExtendedEvent(
       new ProcessedNotificationEvent(
         auditRef, buildAuditEventDetail(ackRef, data), Some("payeRegistrationUpdateRequest"))

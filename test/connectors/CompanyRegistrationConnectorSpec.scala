@@ -16,7 +16,6 @@
 
 package connectors
 
-import config.WSHttp
 import mocks.MockHttp
 import models.CompanyRegistrationPost
 import org.mockito.ArgumentMatchers
@@ -27,22 +26,24 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.Helpers._
 import test.UnitSpec
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyRegistrationConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
 
-  val mockHttp = mock[WSHttp]
+  val mockHttp = mock[HttpClient]
 
   val successResponse = mockHttpResponse(OK)
 
   implicit val hc = new HeaderCarrier()
 
   class Setup {
-    object TestConnector extends RegistrationConnector {
-      val companyRegUrl = "testUrl"
-      val http = mockHttp
+
+    object TestConnector extends CompanyRegistrationConnector(mockHttp) {
+      override lazy val companyRegUrl = "testUrl"
     }
+
   }
 
 
