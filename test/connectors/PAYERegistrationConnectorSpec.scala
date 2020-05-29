@@ -20,18 +20,21 @@ import mocks.MockHttp
 import models.PAYERegistrationPost
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.Helpers._
 import test.UnitSpec
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PAYERegistrationConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
+class PAYERegistrationConnectorSpec extends UnitSpec with MockitoSugar with MockHttp {
   val mockHttp = mock[HttpClient]
+  val mockConfig = mock[Configuration]
+  val mockServicesConfig = mock[ServicesConfig]
 
   val successResponse = mockHttpResponse(OK)
 
@@ -39,21 +42,19 @@ class PAYERegistrationConnectorSpec extends UnitSpec with OneAppPerSuite with Mo
 
   class Setup {
 
-    object TestConnector extends PAYERegistrationConnector(mockHttp) {
+    object TestConnector extends PAYERegistrationConnector(mockHttp, mockConfig, mockServicesConfig) {
       override lazy val payeRegUrl = "testUrl"
     }
 
   }
 
   "processAcknowledgment" should {
-
     val payePost = PAYERegistrationPost(
       Some("testID"),
       "testTimeStamp",
       "testStatus"
     )
-
-    val payeJson = Json.toJson(payePost)
+    Json.toJson(payePost)
 
     "return a HTTPResponse" in new Setup {
       when(mockHttp.POST[JsValue, HttpResponse]

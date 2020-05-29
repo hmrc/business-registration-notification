@@ -29,7 +29,7 @@ abstract class RegistrationAuditEvent(auditType: String, detail: JsObject, trans
   )
 
 object RegistrationAuditEvent {
-  def buildTags(auditType: String) : Map[String, String] = {
+  def buildTags(auditType: String): Map[String, String] = {
     Map("transactionName" -> auditType)
   }
 }

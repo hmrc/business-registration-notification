@@ -17,14 +17,16 @@ package api
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.libs.ws.WS
+import play.api.libs.ws.WSClient
 import util.BasicBase64
 
 class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
+
+  lazy val ws = app.injector.instanceOf[WSClient]
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
@@ -49,7 +51,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
     .configure(additionalConfiguration)
     .build
 
-  private def client(path: String) = WS.url(s"http://localhost:$port/business-registration-notification$path").withFollowRedirects(false)
+  private def client(path: String) = ws.url(s"http://localhost:$port/business-registration-notification$path").withFollowRedirects(false)
 
   class Setup {
 
@@ -78,12 +80,12 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 
       stubFor(
         post(urlMatching("/company-registration/corporation-tax-registration/acknowledgement-confirmation?(.*)"))
-        .withQueryParam("ackref", equalTo("BRCT0001"))
-        .withRequestBody(equalToJson(jsonCR))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(jsonCR))
+          .withQueryParam("ackref", equalTo("BRCT0001"))
+          .withRequestBody(equalToJson(jsonCR))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(jsonCR))
       )
 
       val response = client(s"/notification/BRCT0001").
@@ -92,7 +94,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
         futureValue
 
       response.status shouldBe 200
-      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+      response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
     }
 
     "call PR and return a success on successful ETMP registration" in new Setup {
@@ -119,25 +121,25 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
         futureValue
 
       response.status shouldBe 200
-      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+      response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
 
       verify(postRequestedFor(urlMatching("/write/audit"))
         .withRequestBody(equalToJson(Json.parse(
           s"""
-            |{
-            |  "auditSource" : "business-registration-notification",
-            |  "auditType" : "successfulTaxServiceRegistration",
-            |  "detail" : {
-            |    "acknowledgementReference" : "BRPY0001",
-            |    "timestamp" : "$timestamp",
-            |    "regime" : "paye",
-            |    "empRef" : "EMPREF0001",
-            |    "status" : "04"
-            |  },
-            |  "tags" : {
-            |    "transactionName" : "payeRegistrationUpdateRequest"
-            |  }
-            |}
+             |{
+             |  "auditSource" : "business-registration-notification",
+             |  "auditType" : "successfulTaxServiceRegistration",
+             |  "detail" : {
+             |    "acknowledgementReference" : "BRPY0001",
+             |    "timestamp" : "$timestamp",
+             |    "regime" : "paye",
+             |    "empRef" : "EMPREF0001",
+             |    "status" : "04"
+             |  },
+             |  "tags" : {
+             |    "transactionName" : "payeRegistrationUpdateRequest"
+             |  }
+             |}
           """.stripMargin).toString(), true, true)
         )
       )
@@ -167,7 +169,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
         futureValue
 
       response.status shouldBe 200
-      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+      response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
 
       verify(postRequestedFor(urlMatching("/write/audit"))
         .withRequestBody(equalToJson(Json.parse(
@@ -217,7 +219,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
       verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
 
       response.status shouldBe 200
-      response.json  shouldBe Json.obj( "result" -> "ok", "timestamp" -> timestamp)
+      response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
     }
 
     "handle downstream errors" in new Setup {

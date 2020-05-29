@@ -25,7 +25,9 @@ case class BasicAuthCredentials(username: String, password: String) {
 }
 
 object BasicAuthCredentials {
+
   import Divider.IDivider
+
   def fromAuthorizationHeader(os: Option[String]): Option[BasicAuthCredentials] = {
     os flatMap { s =>
       s.divide(' ') match {

@@ -20,19 +20,20 @@ import mocks.MockHttp
 import models.CompanyRegistrationPost
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.Helpers._
 import test.UnitSpec
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyRegistrationConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with MockHttp {
+class CompanyRegistrationConnectorSpec extends UnitSpec with MockitoSugar with MockHttp {
 
   val mockHttp = mock[HttpClient]
+  val mockServicesConfig = mock[ServicesConfig]
 
   val successResponse = mockHttpResponse(OK)
 
@@ -40,22 +41,19 @@ class CompanyRegistrationConnectorSpec extends UnitSpec with OneAppPerSuite with
 
   class Setup {
 
-    object TestConnector extends CompanyRegistrationConnector(mockHttp) {
+    object TestConnector extends CompanyRegistrationConnector(mockHttp, mockServicesConfig) {
       override lazy val companyRegUrl = "testUrl"
     }
 
   }
 
-
   "processAcknowledgment" should {
-
     val crPost = CompanyRegistrationPost(
       Some("testID"),
       "testTimeStamp",
       "testStatus"
     )
-
-    val crJson = Json.toJson(crPost)
+    Json.toJson(crPost)
 
     "return a HTTPResponse" in new Setup {
       when(mockHttp.POST[JsValue, HttpResponse]

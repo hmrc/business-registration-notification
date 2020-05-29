@@ -24,13 +24,12 @@ import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.Mode.Mode
 import play.api.libs.json._
-import play.api.mvc.{Action, Request, Result}
-import play.api.{Configuration, Logger, Play}
+import play.api.mvc.{Action, ControllerComponents, Request, Result}
+import play.api.{Configuration, Logger, Mode}
 import services.MetricsService
 import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -39,13 +38,14 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class NotificationController @Inject()(val metrics: MetricsService,
                                        val config: Configuration,
-                                       director: ServiceDirector) extends BaseController with BasicAuthentication {
+                                       cc: ControllerComponents,
+                                       director: ServiceDirector) extends BackendController(cc) with BasicAuthentication {
 
-  override protected def mode: Mode = Play.current.mode
+  protected def mode: Mode = mode
 
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
+  protected def runModeConfiguration: Configuration = config
 
-  val authAction = new BasicAuthenticatedAction(getBasicAuthConfig())
+  val authAction = new BasicAuthenticatedAction(getBasicAuthConfig(), cc)
 
   def processNotification(ackRef: String): Action[JsValue] = authAction.async[JsValue](parse.json) {
     implicit request =>
