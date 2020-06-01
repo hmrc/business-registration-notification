@@ -30,7 +30,6 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies                           ++= AppDependencies(),
     retrieveManaged                               := true,
     evictionWarningOptions in update              := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    routesGenerator                               := StaticRoutesGenerator,
     resolvers                                     += Resolver.bintrayRepo("hmrc", "releases"),
     resolvers                                     += Resolver.jcenterRepo,
     addTestReportOption(IntegrationTest, "int-test-reports")

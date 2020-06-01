@@ -18,4 +18,4 @@ package test
 
 import org.scalatest.{Matchers, WordSpec}
 
-trait UnitSpec extends WordSpec with Matchers { }
+trait UnitSpec extends WordSpec with Matchers

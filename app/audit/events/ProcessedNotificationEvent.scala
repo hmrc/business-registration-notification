@@ -18,30 +18,32 @@ package audit.events
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Writes, _}
+import play.api.libs.json.JodaReads._
+import play.api.libs.json.JodaWrites._
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-case class ProcessedNotificationEventDetail(acknowledgementReference : String,
-                                            timestamp : String,
-                                            regime : String,
-                                            ctUtr : Option[String],
-                                            status : String)
+case class ProcessedNotificationEventDetail(acknowledgementReference: String,
+                                            timestamp: String,
+                                            regime: String,
+                                            ctUtr: Option[String],
+                                            status: String)
 
 object ProcessedNotificationEventDetail {
   implicit val writes = new Writes[ProcessedNotificationEventDetail] {
-    def writes(detail : ProcessedNotificationEventDetail) : JsObject = {
+    def writes(detail: ProcessedNotificationEventDetail): JsObject = {
 
       val taxIdentifier = detail.regime match {
         case "paye" => "empRef"
-        case _      => "ctUtr"
+        case _ => "ctUtr"
       }
 
       val notificationWrites = (
         (__ \ "acknowledgementReference").write[String] and
-        (__ \ "timestamp").write[String] and
-        (__ \ "regime").write[String] and
-        (__ \ taxIdentifier).writeNullable[String] and
-        (__ \ "status").write[String]
-      )(unlift(ProcessedNotificationEventDetail.unapply))
+          (__ \ "timestamp").write[String] and
+          (__ \ "regime").write[String] and
+          (__ \ taxIdentifier).writeNullable[String] and
+          (__ \ "status").write[String]
+        ) (unlift(ProcessedNotificationEventDetail.unapply))
 
       Json.toJson(detail)(notificationWrites).as[JsObject]
     }

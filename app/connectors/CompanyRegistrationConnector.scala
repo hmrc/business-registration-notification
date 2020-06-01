@@ -18,24 +18,24 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 import models.CompanyRegistrationPost
-import play.api.Mode.Mode
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Play}
+import play.api.{Configuration, Mode, Play}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 @Singleton
-class CompanyRegistrationConnector @Inject()(http: HttpClient) extends ServicesConfig {
+class CompanyRegistrationConnector @Inject()(http: HttpClient,
+                                             servicesConfig: ServicesConfig) {
 
-  lazy val companyRegUrl = s"${baseUrl("company-registration")}/company-registration"
+  lazy val companyRegUrl = s"${servicesConfig.baseUrl("company-registration")}/company-registration"
 
-  override protected def mode: Mode = Play.current.mode
+  protected def mode: Mode = Mode.Prod
 
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
+  protected def runModeConfiguration: Configuration = Play.current.configuration
 
   def processAcknowledgment(ackRef: String, crPost: CompanyRegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val json = Json.toJson(crPost)

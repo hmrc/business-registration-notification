@@ -16,21 +16,28 @@
 
 package basicauth
 
+import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.{AUTHORIZATION, WWW_AUTHENTICATE}
 import play.api.mvc._
-import uk.gov.hmrc.play.config.RunMode
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class PassThroughAction extends ActionBuilder[Request] with ActionFilter[Request] {
+@Singleton
+class PassThroughAction @Inject()(cc: ControllerComponents) extends ActionBuilder[Request, AnyContent] with ActionFilter[Request] {
+
+  override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+  override protected val executionContext: ExecutionContext = cc.executionContext
 
   def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(None)
 }
 
-class BasicAuthenticatedAction(authConfig: BasicAuthenticationFilterConfiguration)
-  extends ActionBuilder[Request]
+class BasicAuthenticatedAction(authConfig: BasicAuthenticationFilterConfiguration, cc: ControllerComponents)
+  extends ActionBuilder[Request, AnyContent]
     with ActionFilter[Request] {
+
+  override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+  override protected val executionContext: ExecutionContext = cc.executionContext
 
   def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(doFilter(request))
 
@@ -50,7 +57,7 @@ class BasicAuthenticatedAction(authConfig: BasicAuthenticationFilterConfiguratio
 }
 
 class BasicAuthenticationFilterConfiguration(realm: String, val enabled: Boolean,
-                                                  username: String, password: String) {
+                                             username: String, password: String) {
   val basicRealm = "Basic realm=\"" + realm + "\""
 
   def matches(other: Option[BasicAuthCredentials]): Boolean = {
@@ -61,7 +68,7 @@ class BasicAuthenticationFilterConfiguration(realm: String, val enabled: Boolean
   }
 }
 
-trait BasicAuthentication extends RunMode {
+trait BasicAuthentication {
   val config: Configuration
 
   def getBasicAuthConfig(): BasicAuthenticationFilterConfiguration = {
@@ -72,7 +79,7 @@ trait BasicAuthentication extends RunMode {
     val username = config.getString(key("username")).get
     val password = config.getString(key("password")).get
 
-    new BasicAuthenticationFilterConfiguration(realm,enabled,username,password)
+    new BasicAuthenticationFilterConfiguration(realm, enabled, username, password)
   }
 }
 

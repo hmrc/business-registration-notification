@@ -16,19 +16,22 @@
 
 package models
 
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import test.UnitSpec
 
 class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
-  def lineEnd(comma: Boolean) = if( comma ) "," else ""
+  def lineEnd(comma: Boolean) = if (comma) "," else ""
+
   def jsonLine(key: String, value: String): String = jsonLine(key, value, true)
+
   def jsonLine(key: String, value: String, comma: Boolean): String = s""""${key}" : "${value}"${lineEnd(comma)}"""
-  def jsonLine(key: String, value: Option[String], comma: Boolean = true): String = value.fold("")(v=>s""""${key}" : "${v}"${lineEnd(comma)}""")
+
+  def jsonLine(key: String, value: Option[String], comma: Boolean = true): String = value.fold("")(v => s""""${key}" : "${v}"${lineEnd(comma)}""")
 
   val defaultModel = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", Some("123456789"), "04")
-  def j(utr: Option[String] = defaultModel.taxId, status: String = defaultModel.status, regime: String = defaultModel.regime, timestamp : String = defaultModel.timestamp) = {
+
+  def j(utr: Option[String] = defaultModel.taxId, status: String = defaultModel.status, regime: String = defaultModel.regime, timestamp: String = defaultModel.timestamp) = {
     s"""
        |{
        |  "timestamp": "${timestamp}",
@@ -60,19 +63,19 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
     }
 
     "fail to be read from JSON if is empty string" in {
-      val json = j(utr=Some(""))
+      val json = j(utr = Some(""))
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(ValidationError("error.minLength", 1)))
+      shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(JsonValidationError("error.minLength", 1)))
     }
 
     "fail to be read from JSON if line1 is longer than 27 characters" in {
-      val json = j(utr=Some("1234567890123456"))
+      val json = j(utr = Some("1234567890123456"))
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(ValidationError("error.maxLength", 15)))
+      shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(JsonValidationError("error.maxLength", 15)))
     }
   }
 
@@ -94,7 +97,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(JsonValidationError("error.pattern")))
       }
 
       "no status is given" in {
@@ -102,7 +105,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(JsonValidationError("error.pattern")))
       }
 
       "a single char status is given for status" in {
@@ -110,7 +113,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(JsonValidationError("error.pattern")))
       }
 
       "more than two chars are given for status" in {
@@ -118,7 +121,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
         val result = Json.parse(json).validate[ETMPNotification]
 
-        shouldHaveErrors(result, JsPath() \ "status", Seq(ValidationError("error.pattern")))
+        shouldHaveErrors(result, JsPath() \ "status", Seq(JsonValidationError("error.pattern")))
       }
     }
   }
@@ -138,7 +141,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "regime", Seq(ValidationError("error.pattern")))
+      shouldHaveErrors(result, JsPath() \ "regime", Seq(JsonValidationError("error.pattern")))
     }
   }
 
@@ -186,7 +189,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(JsonValidationError("error.pattern")))
     }
 
     "given 2001-12-31T12:00.00" in {
@@ -194,7 +197,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(JsonValidationError("error.pattern")))
     }
 
     "given 2001:12:31T12:00:00" in {
@@ -202,7 +205,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(JsonValidationError("error.pattern")))
     }
 
     "given 2001-12-31T12-00-00" in {
@@ -210,7 +213,7 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(ValidationError("error.pattern")))
+      shouldHaveErrors(result, JsPath() \ "timestamp", Seq(JsonValidationError("error.pattern")))
     }
   }
 }

@@ -19,8 +19,7 @@ package processors
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import services.CompanyRegistrationService
@@ -31,7 +30,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CTProcessorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class CTProcessorSpec extends UnitSpec with MockitoSugar {
 
   val mockAuditConnector = mock[AuditConnector]
   val mockCompanyRegistratioService = mock[CompanyRegistrationService]

@@ -17,41 +17,45 @@
 package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Configuration
-import play.api.Mode.Mode
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.ControllerComponents
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.test.{FakeApplication, FakeRequest}
+import play.api.{Application, Configuration}
 import test.UnitSpec
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-class PingSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class PingSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar {
 
   val testUserName = "foo"
   val testPassword = "bar"
 
-  override lazy val fakeApplication = FakeApplication(additionalConfiguration = Map(
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(additionalConfiguration)
+    .build
+
+  val additionalConfiguration: Map[String, String] = Map(
     "Test.basicAuthentication.enabled" -> "true",
     "Test.basicAuthentication.realm" -> "Test",
     "Test.basicAuthentication.username" -> testUserName,
     "Test.basicAuthentication.password" -> testPassword
-  ))
+  )
 
-  val mockConf = app.injector.instanceOf[Configuration]
+  lazy val mockConf = app.injector.instanceOf[Configuration]
+  lazy val mockControllerComponents = app.injector.instanceOf[ControllerComponents]
+  val mockServicesConfig = mock[ServicesConfig]
 
   val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
-  val mockAuthAction = new BasicAuthenticatedAction(bafc)
+  val mockAuthAction = new BasicAuthenticatedAction(bafc, mockControllerComponents)
   val authAction = mockAuthAction
 
   class Setup {
 
-    object TestController extends Ping(mockConf) {
+    object TestController extends Ping(mockConf, mockControllerComponents, mockServicesConfig) {
       override val authAction = mockAuthAction
-
-      override protected def mode: Mode = fakeApplication.mode
-
-      override protected def runModeConfiguration: Configuration = fakeApplication.configuration
     }
 
   }
@@ -66,13 +70,10 @@ class PingSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   "GET /ping" should {
     "return 401 if no creds" in {
-      val controller = new Ping(mockConf) {
-        override protected def mode: Mode = fakeApplication.mode
-
-        override protected def runModeConfiguration: Configuration = fakeApplication.configuration
+      val controller = new Ping(mockConf, mockControllerComponents, mockServicesConfig) {
 
         val bafc2 = new BasicAuthenticationFilterConfiguration("1234", true, "username", "password")
-        override val authAction = new BasicAuthenticatedAction(bafc2)
+        override val authAction = new BasicAuthenticatedAction(bafc2, mockControllerComponents)
       }
       val fakeRequest = FakeRequest("GET", "/ping")
       val result = controller.auth()(fakeRequest)

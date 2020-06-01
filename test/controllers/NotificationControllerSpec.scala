@@ -24,10 +24,11 @@ import com.kenshoo.play.metrics.Metrics
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.Json
+import play.api.mvc.ControllerComponents
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.MetricsService
@@ -38,13 +39,14 @@ import util.ServiceDirector
 
 import scala.concurrent.Future
 
-class NotificationControllerSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class NotificationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar {
 
   val mockDirector = mock[ServiceDirector]
   val mockMetrics = mock[MetricsService]
   val mockAuditConnector = mock[AuditConnector]
   val mockConf = app.injector.instanceOf[Configuration]
   val mockMetricsInstance = app.injector.instanceOf[Metrics]
+  lazy val mockControllerComponents = app.injector.instanceOf[ControllerComponents]
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -58,11 +60,11 @@ class NotificationControllerSpec extends UnitSpec with OneAppPerSuite with Mocki
   )
 
   val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
-  val mockAuthAction = new BasicAuthenticatedAction(bafc)
+  val mockAuthAction = new BasicAuthenticatedAction(bafc, mockControllerComponents)
 
   class Setup {
 
-    object TestController extends NotificationController(mockMetrics, mockConf, mockDirector) {
+    object TestController extends NotificationController(mockMetrics, mockConf, mockControllerComponents, mockDirector) {
       override val metrics: MetricsService = new MetricsService(mockMetricsInstance) {
         private val mockCounter = mock[Counter]
         override val serviceNotAvailable: Counter = mockCounter

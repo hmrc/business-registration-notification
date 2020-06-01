@@ -20,8 +20,7 @@ import config.Regimes
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import processors.{CTProcessor, PAYEProcessor}
 import test.UnitSpec
@@ -29,7 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class ServiceDirectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with Regimes {
+class ServiceDirectorSpec extends UnitSpec with MockitoSugar with Regimes {
 
   val mockPayeProcessor = mock[PAYEProcessor]
   val mockCTProcessor = mock[CTProcessor]

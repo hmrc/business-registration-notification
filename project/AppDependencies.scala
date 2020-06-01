@@ -22,20 +22,22 @@ private object AppDependencies {
 }
 
 object MainDependencies {
-  private val bootstrapPlay = "5.1.0"
-  private val domainVersion = "5.6.0-play-25"
+  private val bootstrapPlay = "1.7.0"
+  private val domainVersion = "5.9.0-play-26"
+  private val jodaTimeVersion = "2.6.10"
 
   def apply() = Seq(
-    "uk.gov.hmrc" %% "bootstrap-play-25" % bootstrapPlay,
-    "uk.gov.hmrc" %% "domain" % domainVersion
+    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapPlay,
+    "uk.gov.hmrc" %% "domain" % domainVersion,
+    "com.typesafe.play" %% "play-json-joda" % jodaTimeVersion
   )
 }
 
 trait TestDependencies {
-  val scalaTestPlusVersion = "2.0.1"
+  val scalaTestPlusVersion = "3.1.3"
   val pegdownVersion = "1.6.0"
-  val mockitoCoreVersion = "3.3.0"
-  val wiremockVersion = "2.26.0"
+  val mockitoCoreVersion = "3.3.3"
+  val wiremockVersion = "2.26.3"
 
   val scope: Configuration
   val test: Seq[ModuleID]
@@ -43,15 +45,14 @@ trait TestDependencies {
   lazy val coreTestDependencies = Seq(
     "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
     "org.pegdown" % "pegdown" % pegdownVersion % scope,
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
+    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+    "org.mockito" % "mockito-core" % mockitoCoreVersion % scope
   )
 }
 
 object UnitTestDependencies extends TestDependencies {
   override val scope = Test
-  override val test = coreTestDependencies ++ Seq(
-    "org.mockito" % "mockito-core" % mockitoCoreVersion
-  )
+  override val test = coreTestDependencies
 
   def apply() = test
 }
