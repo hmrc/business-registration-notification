@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,43 +24,44 @@ import com.kenshoo.play.metrics.Metrics
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
-import play.api.libs.json.Json
-import play.api.mvc.ControllerComponents
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.MetricsService
-import test.UnitSpec
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import util.ServiceDirector
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class NotificationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar {
+class NotificationControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar {
 
-  val mockDirector = mock[ServiceDirector]
-  val mockMetrics = mock[MetricsService]
-  val mockAuditConnector = mock[AuditConnector]
-  val mockConf = app.injector.instanceOf[Configuration]
-  val mockMetricsInstance = app.injector.instanceOf[Metrics]
-  lazy val mockControllerComponents = app.injector.instanceOf[ControllerComponents]
+  val mockDirector: ServiceDirector = mock[ServiceDirector]
+  val mockMetrics: MetricsService = mock[MetricsService]
+  val mockAuditConnector: AuditConnector = mock[AuditConnector]
+  val mockConf: Configuration = app.injector.instanceOf[Configuration]
+  val mockMetricsInstance: Metrics = app.injector.instanceOf[Metrics]
+  lazy val mockControllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  implicit val hc = new HeaderCarrier()
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val data = ETMPNotification(
+  val data: ETMPNotification = ETMPNotification(
     "2001-12-31T12:00:00Z",
     "corporation-tax",
     Some("testUTRRRRRRRRRRRRRRRRRRRRRR"),
     "04"
   )
 
-  val bafc = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
-  val mockAuthAction = new BasicAuthenticatedAction(bafc, mockControllerComponents)
+  val bafc: BasicAuthenticationFilterConfiguration = new BasicAuthenticationFilterConfiguration("1234", false, "username", "password")
+  val mockAuthAction: BasicAuthenticatedAction = new BasicAuthenticatedAction(bafc, mockControllerComponents)
 
   class Setup {
 
@@ -74,7 +75,7 @@ class NotificationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with 
         override val internalServerError: Counter = mockCounter
         override val serverErrorCodes: Counter = mockCounter
       }
-      override val authAction = mockAuthAction
+      override val authAction: BasicAuthenticatedAction = mockAuthAction
     }
 
   }
@@ -86,19 +87,25 @@ class NotificationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with 
         when(mockDirector.goToService(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data))
-        val result = TestController.processNotification("testAckRef")(request)
+        val request: FakeRequest[JsValue] = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data))
+        val result: Future[Result] = TestController.processNotification("testAckRef")(request)
         status(result) shouldBe BAD_REQUEST
       }
 
       "the UTR isnt present" in new Setup {
 
-        val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some(""))))
+        val request: FakeRequest[JsValue] =
+          FakeRequest()
+            .withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
+            .withBody(Json.toJson(data.copy(taxId = Some(""))))
 
-        when(mockDirector.goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some(""))))(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(OK))
+        when(mockDirector.goToService(
+          ArgumentMatchers.eq("testAckRef"),
+          ArgumentMatchers.eq("corporation-tax"),
+          ArgumentMatchers.eq(data.copy(taxId = Some("")))
+        )(ArgumentMatchers.any())).thenReturn(Future.successful(OK))
 
-        val result = TestController.processNotification("testAckRef")(request)
+        val result: Future[Result] = TestController.processNotification("testAckRef")(request)
         status(result) shouldBe BAD_REQUEST
       }
     }
@@ -106,61 +113,83 @@ class NotificationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with 
     "return an OK" when {
       "a record has been successfully updated" in new Setup {
 
-        val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+        val request: FakeRequest[JsValue] =
+          FakeRequest()
+            .withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
+            .withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
         when(mockDirector.goToService(
           ArgumentMatchers.eq("testAckRef"),
           ArgumentMatchers.eq("corporation-tax"),
           ArgumentMatchers.eq(data.copy(taxId = Some("123456789")))
-        )(ArgumentMatchers.any[HeaderCarrier]())
-        ).thenReturn(Future.successful(OK))
+        )(ArgumentMatchers.any[HeaderCarrier]())).thenReturn(Future.successful(OK))
 
-        val result = TestController.processNotification("testAckRef")(request)
+        val result: Future[Result] = TestController.processNotification("testAckRef")(request)
         status(result) shouldBe OK
       }
     }
 
     "return an other status" in new Setup {
-      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+      val request: FakeRequest[JsValue] =
+        FakeRequest()
+          .withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
+          .withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
-      when(mockDirector
-        .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CONTINUE))
+      when(mockDirector.goToService(
+        ArgumentMatchers.eq("testAckRef"),
+        ArgumentMatchers.eq("corporation-tax"),
+        ArgumentMatchers.eq(data.copy(taxId = Some("123456789")))
+      )(ArgumentMatchers.any())).thenReturn(Future.successful(CONTINUE))
 
-      val result = TestController.processNotification("testAckRef")(request)
+      val result: Future[Result] = TestController.processNotification("testAckRef")(request)
       status(result) shouldBe CONTINUE
     }
 
     "return a NotFound" in new Setup {
-      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+      val request: FakeRequest[JsValue] =
+        FakeRequest()
+          .withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
+          .withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
-      when(mockDirector
-        .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new NotFoundException("")))
+      when(mockDirector.goToService(
+        ArgumentMatchers.eq("testAckRef"),
+        ArgumentMatchers.eq("corporation-tax"),
+        ArgumentMatchers.eq(data.copy(taxId = Some("123456789")))
+      )(ArgumentMatchers.any())).thenReturn(Future.failed(new NotFoundException("")))
 
-      val result = TestController.processNotification("testAckRef")(request)
+      val result: Future[Result] = TestController.processNotification("testAckRef")(request)
       status(result) shouldBe NOT_FOUND
     }
 
     "return a ServiceUnavailable" in new Setup {
-      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+      val request: FakeRequest[JsValue] =
+        FakeRequest()
+          .withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
+          .withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
-      when(mockDirector
-        .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new ServiceUnavailableException("")))
+      when(mockDirector.goToService(
+        ArgumentMatchers.eq("testAckRef"),
+        ArgumentMatchers.eq("corporation-tax"),
+        ArgumentMatchers.eq(data.copy(taxId = Some("123456789")))
+      )(ArgumentMatchers.any())).thenReturn(Future.failed(new ServiceUnavailableException("")))
 
-      val result = TestController.processNotification("testAckRef")(request)
+      val result: Future[Result] = TestController.processNotification("testAckRef")(request)
       status(result) shouldBe SERVICE_UNAVAILABLE
     }
 
     "return a InternalServerError" in new Setup {
-      val request = FakeRequest().withHeaders("Authorization" -> "Basic Zm9vOmJhcg==").withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
+      val request: FakeRequest[JsValue] =
+        FakeRequest()
+          .withHeaders("Authorization" -> "Basic Zm9vOmJhcg==")
+          .withBody(Json.toJson(data.copy(taxId = Some("123456789"))))
 
-      when(mockDirector
-        .goToService(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq("corporation-tax"), ArgumentMatchers.eq(data.copy(taxId = Some("123456789"))))(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new InternalServerException("")))
+      when(mockDirector.goToService(
+        ArgumentMatchers.eq("testAckRef"),
+        ArgumentMatchers.eq("corporation-tax"),
+        ArgumentMatchers.eq(data.copy(taxId = Some("123456789")))
+      )(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalServerException("")))
 
-      val result = TestController.processNotification("testAckRef")(request)
+      val result: Future[Result] = TestController.processNotification("testAckRef")(request)
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }

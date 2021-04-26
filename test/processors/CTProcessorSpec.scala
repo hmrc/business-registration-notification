@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,27 @@
 
 package processors
 
-import models.ETMPNotification
+import models.{CompanyRegistrationPost, ETMPNotification}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import services.CompanyRegistrationService
-import test.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class CTProcessorSpec extends UnitSpec with MockitoSugar {
+class CTProcessorSpec extends WordSpec with Matchers with MockitoSugar {
 
-  val mockAuditConnector = mock[AuditConnector]
-  val mockCompanyRegistratioService = mock[CompanyRegistrationService]
+  val mockAuditConnector: AuditConnector = mock[AuditConnector]
+  val mockCompanyRegistrationService: CompanyRegistrationService = mock[CompanyRegistrationService]
 
-  val testEtmpNotification =
+  val testEtmpNotification: ETMPNotification =
     ETMPNotification(
       timestamp = "testStamp",
       regime = "corporation-tax",
@@ -43,7 +44,7 @@ class CTProcessorSpec extends UnitSpec with MockitoSugar {
       status = "testStatus"
     )
 
-  val testEventDetailJson =
+  val testEventDetailJson: JsValue =
     Json.parse(
       """
         |{
@@ -54,15 +55,15 @@ class CTProcessorSpec extends UnitSpec with MockitoSugar {
         |   "status":"testStatus"
         |}""".stripMargin)
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   class Setup {
-    val testProcessor = new CTProcessor(mockAuditConnector, mockCompanyRegistratioService)
+    val testProcessor = new CTProcessor(mockAuditConnector, mockCompanyRegistrationService)
   }
 
   "notificationToCRPost" should {
     "successfully convert an ETMP notification to a CompanyRegistrationPost" in new Setup {
-      val result = testProcessor.notificationToCRPost(testEtmpNotification)
+      val result: CompanyRegistrationPost = testProcessor.notificationToCRPost(testEtmpNotification)
       result.ctUtr shouldBe Some("testTaxId")
       result.timestamp shouldBe "testStamp"
       result.status shouldBe "testStatus"
@@ -76,10 +77,10 @@ class CTProcessorSpec extends UnitSpec with MockitoSugar {
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
-        when(mockCompanyRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistrationService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
         result shouldBe OK
       }
 
@@ -87,10 +88,10 @@ class CTProcessorSpec extends UnitSpec with MockitoSugar {
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.successful(Success))
 
-        when(mockCompanyRegistratioService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistrationService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
         result shouldBe OK
       }
     }

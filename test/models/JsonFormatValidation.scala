@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package models
 
+import org.scalatest.{Assertion, Matchers, WordSpec}
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
-import test.UnitSpec
 
 trait JsonFormatValidation {
-  this: UnitSpec =>
+  this: WordSpec with Matchers =>
 
-  def shouldBeSuccess[T](expected: T, result: JsResult[T]) = {
+  def shouldBeSuccess[T](expected: T, result: JsResult[T]): Assertion = {
     result match {
-      case JsSuccess(value, path) => value shouldBe expected
-      case JsError(errors) => fail(s"Test produced errors - ${errors}")
+      case JsSuccess(value, _) => value shouldBe expected
+      case JsError(errors) => fail(s"Test produced errors - $errors")
     }
   }
 
@@ -40,35 +40,31 @@ trait JsonFormatValidation {
 
   def shouldHaveErrors[T](result: JsResult[T], expectedErrors: Map[JsPath, Seq[JsonValidationError]]): Unit = {
     result match {
-      case JsSuccess(value, path) => fail(s"read should have failed and didn't - produced ${value}")
-      case JsError(errors) => {
+      case JsSuccess(value, _) => fail(s"read should have failed and didn't - produced $value")
+      case JsError(errors) =>
         errors.length shouldBe expectedErrors.keySet.toSeq.length
 
         for (error <- errors) {
           error match {
-            case (path, valErrs) => {
+            case (path, valErrs) =>
               expectedErrors.keySet should contain(path)
               expectedErrors(path) shouldBe valErrs
-            }
           }
         }
-      }
     }
   }
 
-  def shouldHaveErrors2[T](result: JsResult[T], errorPath: JsPath, expectedError: ValidationError) = {
+  def shouldHaveErrors2[T](result: JsResult[T], errorPath: JsPath, expectedError: ValidationError): Assertion = {
     result match {
-      case JsSuccess(value, path) => fail(s"read should have failed and didn't - produced ${value}")
-      case JsError(errors) => {
+      case JsSuccess(value, _) => fail(s"read should have failed and didn't - produced $value")
+      case JsError(errors) =>
         errors.length shouldBe 1
-        errors(0) match {
-          case (path, error) => {
+        errors.head match {
+          case (path, error) =>
             path shouldBe errorPath
             error.length shouldBe 1
-            error(0) shouldBe expectedError
-          }
+            error shouldBe expectedError
         }
-      }
     }
   }
 }

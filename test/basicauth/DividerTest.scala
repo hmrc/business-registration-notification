@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package basicauth
 
-import test.UnitSpec
+import org.scalatest.{Matchers, WordSpec}
 import util.Divider
 
-class DividerTest extends UnitSpec {
+class DividerTest extends WordSpec with Matchers {
+
   import Divider.IDivider
 
   "divide" in {

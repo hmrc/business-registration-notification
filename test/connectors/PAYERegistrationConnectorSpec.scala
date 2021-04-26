@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,26 @@ import mocks.MockHttp
 import models.PAYERegistrationPost
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.Helpers._
-import test.UnitSpec
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class PAYERegistrationConnectorSpec extends UnitSpec with MockitoSugar with MockHttp {
-  val mockHttp = mock[HttpClient]
-  val mockConfig = mock[Configuration]
-  val mockServicesConfig = mock[ServicesConfig]
+class PAYERegistrationConnectorSpec extends WordSpec with Matchers with MockitoSugar with MockHttp {
+  val mockHttp: HttpClient = mock[HttpClient]
+  val mockConfig: Configuration = mock[Configuration]
+  val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
 
-  val successResponse = mockHttpResponse(OK)
+  val successResponse: HttpResponse = mockHttpResponse(OK)
 
-  implicit val hc = new HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   class Setup {
 
@@ -59,10 +60,13 @@ class PAYERegistrationConnectorSpec extends UnitSpec with MockitoSugar with Mock
     "return a HTTPResponse" in new Setup {
       when(mockHttp.POST[JsValue, HttpResponse]
         (ArgumentMatchers.anyString(), ArgumentMatchers.any[JsValue](), ArgumentMatchers.any())
-        (ArgumentMatchers.any[Writes[JsValue]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        (ArgumentMatchers.any[Writes[JsValue]](),
+          ArgumentMatchers.any[HttpReads[HttpResponse]](),
+          ArgumentMatchers.any[HeaderCarrier](),
+          ArgumentMatchers.any[ExecutionContext]()))
         .thenReturn(Future.successful(successResponse))
 
-      val result = await(TestConnector.processAcknowledgement("testAckRef", payePost))
+      val result: HttpResponse = await(TestConnector.processAcknowledgement("testAckRef", payePost))
       result.status shouldBe OK
     }
   }

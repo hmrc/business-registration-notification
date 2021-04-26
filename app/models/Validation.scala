@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ trait NotificationValidator {
 
   import Validation.lengthFmt
 
-  val taxIdentifierValidator = lengthFmt(15) // scalastyle:ignore magic.number
-  val statusValidator = pattern("^04|05|06|07|08|09|10$".r)
-  val regimeValidator = pattern("^corporation-tax|paye$".r)
-  val isoDateValidator = pattern("^\\d{4}(-\\d\\d(-\\d\\d(T\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?(([+-]\\d\\d:\\d\\d)|Z)?)?)?)?$".r)
+  val taxIdentifierValidator: Format[String] = lengthFmt(15) // scalastyle:ignore magic.number
+  val statusValidator: Reads[String] = pattern("^04|05|06|07|08|09|10$".r)
+  val regimeValidator: Reads[String] = pattern("^corporation-tax|paye$".r)
+  val isoDateValidator: Reads[String] = pattern("^\\d{4}(-\\d\\d(-\\d\\d(T\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?(([+-]\\d\\d:\\d\\d)|Z)?)?)?)?$".r)
 }

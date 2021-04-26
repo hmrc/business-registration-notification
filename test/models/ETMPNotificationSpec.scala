@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,33 @@
 
 package models
 
+import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json._
-import test.UnitSpec
 
-class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
+class ETMPNotificationSpec extends WordSpec with Matchers with JsonFormatValidation {
 
-  def lineEnd(comma: Boolean) = if (comma) "," else ""
+  def lineEnd(comma: Boolean): String = if (comma) "," else ""
 
-  def jsonLine(key: String, value: String): String = jsonLine(key, value, true)
+  def jsonLine(key: String, value: String): String = jsonLine(key, value, comma = true)
 
-  def jsonLine(key: String, value: String, comma: Boolean): String = s""""${key}" : "${value}"${lineEnd(comma)}"""
+  def jsonLine(key: String, value: String, comma: Boolean): String = s""""$key" : "$value"${lineEnd(comma)}"""
 
-  def jsonLine(key: String, value: Option[String], comma: Boolean = true): String = value.fold("")(v => s""""${key}" : "${v}"${lineEnd(comma)}""")
+  def jsonLine(key: String, value: Option[String], comma: Boolean = true): String = value.fold("")(v => s""""$key" : "$v"${lineEnd(comma)}""")
 
-  val defaultModel = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", Some("123456789"), "04")
+  val defaultModel: ETMPNotification = ETMPNotification("2001-12-31T12:00:00Z", "corporation-tax", Some("123456789"), "04")
 
-  def j(utr: Option[String] = defaultModel.taxId, status: String = defaultModel.status, regime: String = defaultModel.regime, timestamp: String = defaultModel.timestamp) = {
+  def j(utr: Option[String] = defaultModel.taxId,
+        status: String = defaultModel.status,
+        regime: String = defaultModel.regime,
+        timestamp: String = defaultModel.timestamp): String =
     s"""
        |{
-       |  "timestamp": "${timestamp}",
-       |  "regime": "${regime}",
+       |  "timestamp": "$timestamp",
+       |  "regime": "$regime",
        |  ${jsonLine("business-tax-identifier", utr)}
-       |  "status": "${status}"
+       |  "status": "$status"
        |}
      """.stripMargin
-  }
 
   "ETMPNotification Model - utr" should {
     "Be able to be parsed with valid UTR" in {
@@ -72,10 +74,11 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
     "fail to be read from JSON if line1 is longer than 27 characters" in {
       val json = j(utr = Some("1234567890123456"))
+      val maxLength: Int = 15
 
       val result = Json.parse(json).validate[ETMPNotification]
 
-      shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(JsonValidationError("error.maxLength", 15)))
+      shouldHaveErrors(result, JsPath() \ "business-tax-identifier", Seq(JsonValidationError("error.maxLength", maxLength)))
     }
   }
 
@@ -93,7 +96,6 @@ class ETMPNotificationSpec extends UnitSpec with JsonFormatValidation {
 
       "parsed with a dodgy status" in {
         val json = j(status = "xx")
-        val expected = defaultModel.copy(status = "xx")
 
         val result = Json.parse(json).validate[ETMPNotification]
 

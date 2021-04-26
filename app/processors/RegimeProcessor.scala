@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import scala.concurrent.Future
 trait RegimeProcessor {
 
   class AuditError(msg: String) extends Exception {
-    override def getMessage = msg
+    override def getMessage: String = msg
   }
 
   def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int]

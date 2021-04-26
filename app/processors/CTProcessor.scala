@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,18 @@ package processors
 
 import audit.builders.AuditBuilding
 import audit.events.ProcessedNotificationEvent
-import javax.inject.{Inject, Singleton}
 import models.{CompanyRegistrationPost, ETMPNotification}
 import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CTProcessor @Inject()(auditConnector: AuditConnector,
-                            registrationService: CompanyRegistrationService)
-  extends RegimeProcessor with AuditBuilding {
+                            registrationService: CompanyRegistrationService
+                           )(implicit ec: ExecutionContext) extends RegimeProcessor with AuditBuilding {
 
   private[processors] def notificationToCRPost(notification: ETMPNotification): CompanyRegistrationPost = {
     CompanyRegistrationPost(notification.taxId, notification.timestamp, notification.status)
