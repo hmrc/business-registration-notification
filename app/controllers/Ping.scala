@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
+
 @Singleton
 class Ping @Inject()(val config: Configuration,
                      cc: ControllerComponents,
                      val serviceConfig: ServicesConfig) extends BackendController(cc) with BasicAuthentication {
-  val authAction: ActionBuilder[Request, AnyContent] = new BasicAuthenticatedAction(getBasicAuthConfig(), cc)
+  val authAction: ActionBuilder[Request, AnyContent] = new BasicAuthenticatedAction(getBasicAuthConfig, cc)
 
   def noAuth(): Action[AnyContent] = Action {
     Ok

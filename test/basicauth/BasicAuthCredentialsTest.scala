@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package basicauth
 
-import test.UnitSpec
+import org.scalatest.{Matchers, WordSpec}
 
-class BasicAuthCredentialsTest extends UnitSpec {
+class BasicAuthCredentialsTest extends WordSpec with Matchers {
 
   "conversion of a known value succeeds correctly" in {
     val creds = BasicAuthCredentials.fromAuthorizationHeader(Some("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="))

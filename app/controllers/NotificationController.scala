@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,31 @@
 
 package controllers
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import _root_.util.ServiceDirector
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
-import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
-import play.api.{Configuration, Logger, Mode}
+import play.api.{Configuration, Logger}
 import services.MetricsService
 import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.Future
+import java.text.SimpleDateFormat
+import java.util.Date
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
 class NotificationController @Inject()(val metrics: MetricsService,
                                        val config: Configuration,
                                        cc: ControllerComponents,
-                                       director: ServiceDirector) extends BackendController(cc) with BasicAuthentication {
+                                       director: ServiceDirector
+                                      )(implicit ec: ExecutionContext) extends BackendController(cc) with BasicAuthentication {
 
-  protected def mode: Mode = mode
-
-  protected def runModeConfiguration: Configuration = config
-
-  val authAction = new BasicAuthenticatedAction(getBasicAuthConfig(), cc)
+  val authAction = new BasicAuthenticatedAction(getBasicAuthConfig, cc)
 
   def processNotification(ackRef: String): Action[JsValue] = authAction.async[JsValue](parse.json) {
     implicit request =>
@@ -61,22 +56,21 @@ class NotificationController @Inject()(val metrics: MetricsService,
               ))
             case otherStatus => new Status(otherStatus)
           } recover {
-            case ex: NotFoundException =>
+            case _: NotFoundException =>
               Logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
               metrics.ackRefNotFound.inc(1)
               metrics.clientErrorCodes.inc(1)
               NotFound(buildFailureResponse(notif.timestamp, Some("Acknowledgement reference not found")))
             case ex: ServiceUnavailableException =>
-              Logger.error(s"SERVICE UNAVAILABLE : ${ex}")
+              Logger.error(s"SERVICE UNAVAILABLE : $ex")
               metrics.serviceNotAvailable.inc(1)
               metrics.serverErrorCodes.inc(1)
               ServiceUnavailable(buildFailureResponse(notif.timestamp))
-            case ex => {
-              Logger.error(s"INTERNAL SERVER ERROR : ${ex}")
+            case ex =>
+              Logger.error(s"INTERNAL SERVER ERROR : $ex")
               metrics.internalServerError.inc(1)
               metrics.serverErrorCodes.inc(1)
               InternalServerError(buildFailureResponse(notif.timestamp))
-            }
           }
       }
   }
@@ -89,13 +83,16 @@ class NotificationController @Inject()(val metrics: MetricsService,
     }
   }
 
-  def timestampNow(): String = {
+  def timestampNow: String = {
     val timeStampFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
     val format: SimpleDateFormat = new SimpleDateFormat(timeStampFormat)
     format.format(new Date(DateTime.now(DateTimeZone.UTC).getMillis))
   }
 
-  override def withJsonBody[T](f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]) =
+  override def withJsonBody[T](f: T => Future[Result])
+                              (implicit request: Request[JsValue],
+                               m: Manifest[T],
+                               reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>

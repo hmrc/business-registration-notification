@@ -22,12 +22,12 @@ private object AppDependencies {
 }
 
 object MainDependencies {
-  private val bootstrapPlay = "1.7.0"
-  private val domainVersion = "5.9.0-play-26"
+  private val bootstrapPlay = "3.2.0"
+  private val domainVersion = "5.11.0-play-26"
   private val jodaTimeVersion = "2.6.10"
 
   def apply() = Seq(
-    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapPlay,
+    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % bootstrapPlay,
     "uk.gov.hmrc" %% "domain" % domainVersion,
     "com.typesafe.play" %% "play-json-joda" % jodaTimeVersion
   )
@@ -36,8 +36,8 @@ object MainDependencies {
 trait TestDependencies {
   val scalaTestPlusVersion = "3.1.3"
   val pegdownVersion = "1.6.0"
-  val mockitoCoreVersion = "3.3.3"
-  val wiremockVersion = "2.26.3"
+  val mockitoCoreVersion = "3.9.0"
+  val wiremockVersion = "2.27.2"
 
   val scope: Configuration
   val test: Seq[ModuleID]

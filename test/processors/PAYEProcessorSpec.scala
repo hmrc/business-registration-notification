@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,26 @@
 
 package processors
 
-import models.ETMPNotification
+import models.{ETMPNotification, PAYERegistrationPost}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import services.CompanyRegistrationService
-import test.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class PAYEProcessorSpec extends UnitSpec with MockitoSugar {
+class PAYEProcessorSpec extends WordSpec with Matchers with MockitoSugar {
 
-  val mockAuditConnector = mock[AuditConnector]
-  val mockCompanyRegistratioService = mock[CompanyRegistrationService]
+  val mockAuditConnector: AuditConnector = mock[AuditConnector]
+  val mockCompanyRegistrationService: CompanyRegistrationService = mock[CompanyRegistrationService]
 
-  val testEtmpNotification =
+  val testEtmpNotification: ETMPNotification =
     ETMPNotification(
       timestamp = "testStamp",
       regime = "paye",
@@ -42,15 +43,15 @@ class PAYEProcessorSpec extends UnitSpec with MockitoSugar {
       status = "testStatus"
     )
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   class Setup {
-    val testProcessor = new PAYEProcessor(mockAuditConnector, mockCompanyRegistratioService)
+    val testProcessor = new PAYEProcessor(mockAuditConnector, mockCompanyRegistrationService)
   }
 
   "notificationToCRPost" should {
     "successfully convert an ETMP notification to a CompanyRegistrationPost" in new Setup {
-      val result = testProcessor.notificationToPAYEPost(testEtmpNotification)
+      val result: PAYERegistrationPost = testProcessor.notificationToPAYEPost(testEtmpNotification)
       result.empRef shouldBe Some("testTaxId")
       result.timestamp shouldBe "testStamp"
       result.status shouldBe "testStatus"
@@ -60,33 +61,33 @@ class PAYEProcessorSpec extends UnitSpec with MockitoSugar {
   "processRegime" should {
     "return an OK int" when {
       "the data is sent to PR and audited successfully" in new Setup {
-        when(mockCompanyRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistrationService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.successful(Success))
 
-        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
         result shouldBe OK
       }
       "the data is sent to PR and auditing returns a Failure" in new Setup {
-        when(mockCompanyRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistrationService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
-        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
         result shouldBe OK
       }
       "the data is sent to PR and auditing fails" in new Setup {
-        when(mockCompanyRegistratioService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompanyRegistrationService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
         when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
           .thenReturn(Future.failed(new RuntimeException))
 
-        val result = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
+        val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
         result shouldBe OK
       }
     }

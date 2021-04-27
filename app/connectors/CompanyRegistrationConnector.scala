@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,30 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
 import models.CompanyRegistrationPost
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Mode, Play}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import play.api.{Configuration, Mode}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CompanyRegistrationConnector @Inject()(http: HttpClient,
-                                             servicesConfig: ServicesConfig) {
+                                             servicesConfig: ServicesConfig,
+                                             configuration: Configuration) {
 
   lazy val companyRegUrl = s"${servicesConfig.baseUrl("company-registration")}/company-registration"
 
   protected def mode: Mode = Mode.Prod
 
-  protected def runModeConfiguration: Configuration = Play.current.configuration
+  protected def runModeConfiguration: Configuration = configuration
 
-  def processAcknowledgment(ackRef: String, crPost: CompanyRegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def processAcknowledgment(ackRef: String,
+                            crPost: CompanyRegistrationPost
+                           )(implicit hc: HeaderCarrier,
+                             ec: ExecutionContext): Future[HttpResponse] = {
     val json = Json.toJson(crPost)
     http.POST[JsValue, HttpResponse](s"$companyRegUrl/corporation-tax-registration/acknowledgement-confirmation?ackref=$ackRef", json)
   }

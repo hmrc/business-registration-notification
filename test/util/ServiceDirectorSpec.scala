@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,20 @@ import config.Regimes
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import processors.{CTProcessor, PAYEProcessor}
-import test.UnitSpec
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class ServiceDirectorSpec extends UnitSpec with MockitoSugar with Regimes {
+class ServiceDirectorSpec extends WordSpec with Matchers with MockitoSugar with Regimes {
 
-  val mockPayeProcessor = mock[PAYEProcessor]
-  val mockCTProcessor = mock[CTProcessor]
+  val mockPayeProcessor: PAYEProcessor = mock[PAYEProcessor]
+  val mockCTProcessor: CTProcessor = mock[CTProcessor]
 
-  implicit val hc = new HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
 
   class Setup {
@@ -42,19 +42,19 @@ class ServiceDirectorSpec extends UnitSpec with MockitoSugar with Regimes {
 
   "goToService" should {
     "return a 400 if an invalid regime has been presented" in new Setup {
-      val data = ETMPNotification(
+      val data: ETMPNotification = ETMPNotification(
         "testTimeStamp",
         "invalidRegime",
         Some("testID"),
         "testStatus"
       )
 
-      val result = await(testDirector.goToService("testAckRef", data.regime, data))
+      val result: Int = await(testDirector.goToService("testAckRef", data.regime, data))
       result shouldBe INVALID_REGIME
     }
 
     "return a 200 if corporation-tax is the regime and the data is sent to CR" in new Setup {
-      val data = ETMPNotification(
+      val data: ETMPNotification = ETMPNotification(
         "testTimeStamp",
         "corporation-tax",
         Some("testID"),
@@ -64,12 +64,12 @@ class ServiceDirectorSpec extends UnitSpec with MockitoSugar with Regimes {
       when(mockCTProcessor.processRegime(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq(data))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(OK))
 
-      val result = await(testDirector.goToService("testAckRef", data.regime, data))
+      val result: Int = await(testDirector.goToService("testAckRef", data.regime, data))
       result shouldBe OK
     }
 
     "return a 200 if paye is the regime and the data is sent to PR" in new Setup {
-      val data = ETMPNotification(
+      val data: ETMPNotification = ETMPNotification(
         "testTimeStamp",
         "paye",
         Some("testID"),
@@ -79,7 +79,7 @@ class ServiceDirectorSpec extends UnitSpec with MockitoSugar with Regimes {
       when(mockPayeProcessor.processRegime(ArgumentMatchers.eq("testAckRef"), ArgumentMatchers.eq(data))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(OK))
 
-      val result = await(testDirector.goToService("testAckRef", data.regime, data))
+      val result: Int = await(testDirector.goToService("testAckRef", data.regime, data))
       result shouldBe OK
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package basicauth
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HeaderNames.{AUTHORIZATION, WWW_AUTHENTICATE}
 import play.api.mvc._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -42,28 +42,27 @@ class BasicAuthenticatedAction(authConfig: BasicAuthenticationFilterConfiguratio
   def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(doFilter(request))
 
   private def doFilter[A](request: Request[A]): Option[Result] = {
-    authConfig.enabled match {
-      case false => None // bypassed
-      case _ => {
-        val creds = BasicAuthCredentials.fromAuthorizationHeader(request.headers.get(AUTHORIZATION))
-        if (authConfig.matches(creds)) {
-          None // valid credentials: allow subsequent operations to proceed
-        } else {
-          Some(Results.Unauthorized.withHeaders(WWW_AUTHENTICATE -> authConfig.basicRealm))
-        }
+    if (authConfig.enabled) {
+      val creds = BasicAuthCredentials.fromAuthorizationHeader(request.headers.get(AUTHORIZATION))
+      if (authConfig.matches(creds)) {
+        None // valid credentials: allow subsequent operations to proceed
+      } else {
+        Some(Results.Unauthorized.withHeaders(WWW_AUTHENTICATE -> authConfig.basicRealm))
       }
+    } else {
+      None
     }
   }
 }
 
 class BasicAuthenticationFilterConfiguration(realm: String, val enabled: Boolean,
                                              username: String, password: String) {
-  val basicRealm = "Basic realm=\"" + realm + "\""
+  val basicRealm: String = "Basic realm=\"" + realm + "\""
 
   def matches(other: Option[BasicAuthCredentials]): Boolean = {
     other match {
-      case None => false
       case Some(creds) => username == creds.username && password == creds.password
+      case None => false
     }
   }
 }
@@ -71,13 +70,13 @@ class BasicAuthenticationFilterConfiguration(realm: String, val enabled: Boolean
 trait BasicAuthentication {
   val config: Configuration
 
-  def getBasicAuthConfig(): BasicAuthenticationFilterConfiguration = {
+  def getBasicAuthConfig: BasicAuthenticationFilterConfiguration = {
     def key(k: String) = s"basicAuthentication.$k"
 
-    val enabled = config.getString(key("enabled")).get.toBoolean
-    val realm = config.getString(key("realm")).get
-    val username = config.getString(key("username")).get
-    val password = config.getString(key("password")).get
+    val enabled = config.get[Boolean](key("enabled"))
+    val realm = config.get[String](key("realm"))
+    val username = config.get[String](key("username"))
+    val password = config.get[String](key("password"))
 
     new BasicAuthenticationFilterConfiguration(realm, enabled, username, password)
   }

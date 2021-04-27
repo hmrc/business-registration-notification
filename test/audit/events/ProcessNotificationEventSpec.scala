@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package audit.events
 
+import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsObject, JsValue, Json}
-import test.UnitSpec
 
-class ProcessNotificationEventSpec extends UnitSpec {
+class ProcessNotificationEventSpec extends WordSpec with Matchers {
 
   "ProcessedNotificationEvent" should {
     "construct a valid json structure as per confluence" when {
       "converting a case class to Json with a CTUTR" in {
-        val expected : String =
+        val expected: String =
           """
             |{
             |   "acknowledgementReference" : "BRCT123456789",
@@ -48,7 +48,7 @@ class ProcessNotificationEventSpec extends UnitSpec {
       }
 
       "converting a case class to Json without a CTUTR" in {
-        val expected : String =
+        val expected: String =
           """
             |{
             |   "acknowledgementReference" : "BRCT123456789",

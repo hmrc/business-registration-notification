@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.codahale.metrics.Counter
 import org.scalatestplus.mockito.MockitoSugar
 
 object MockMetricsService extends MockitoSugar {
-  val fakeCounter = mock[Counter]
+  val fakeCounter: Counter = mock[Counter]
 
   val etmpNotificationCounter: Counter = fakeCounter
   val ackRefNotFound: com.codahale.metrics.Counter = fakeCounter

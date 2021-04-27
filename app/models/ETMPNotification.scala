@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package models
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Json, __}
+import play.api.libs.json.{Json, OFormat, __}
 
 case class ETMPNotification(timestamp: String,
                             regime: String,
@@ -25,7 +25,7 @@ case class ETMPNotification(timestamp: String,
                             status: String)
 
 object ETMPNotification extends NotificationValidator {
-  implicit val format = (
+  implicit val format: OFormat[ETMPNotification] = (
     (__ \ "timestamp").format[String](isoDateValidator) and
       (__ \ "regime").format[String](regimeValidator) and
       (__ \ "business-tax-identifier").formatNullable[String](taxIdentifierValidator) and
@@ -38,7 +38,7 @@ case class CompanyRegistrationPost(ctUtr: Option[String],
                                    status: String)
 
 object CompanyRegistrationPost {
-  implicit val format = Json.format[CompanyRegistrationPost]
+  implicit val format: OFormat[CompanyRegistrationPost] = Json.format[CompanyRegistrationPost]
 }
 
 case class PAYERegistrationPost(empRef: Option[String],
@@ -46,5 +46,5 @@ case class PAYERegistrationPost(empRef: Option[String],
                                 status: String)
 
 object PAYERegistrationPost {
-  implicit val format = Json.format[PAYERegistrationPost]
+  implicit val format: OFormat[PAYERegistrationPost] = Json.format[PAYERegistrationPost]
 }

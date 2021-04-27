@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,25 @@ import play.api.{Configuration, Mode}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.HttpClient
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PAYERegistrationConnector @Inject()(val http: HttpClient,
-                                          val config: Configuration,
+class PAYERegistrationConnector @Inject()(http: HttpClient,
+                                          configuration: Configuration,
                                           servicesConfig: ServicesConfig) {
 
   lazy val payeRegUrl = s"${servicesConfig.baseUrl("paye-registration")}/paye-registration"
 
-  protected def mode: Mode = mode
+  protected def mode: Mode = Mode.Prod
 
-  protected def runModeConfiguration: Configuration = config
+  protected def runModeConfiguration: Configuration = configuration
 
-  def processAcknowledgement(ackRef: String, payePost: PAYERegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def processAcknowledgement(ackRef: String,
+                             payePost: PAYERegistrationPost
+                            )(implicit hc: HeaderCarrier,
+                              ec: ExecutionContext): Future[HttpResponse] = {
     val json = Json.toJson(payePost)
     http.POST[JsValue, HttpResponse](s"$payeRegUrl/registration-processed-confirmation?ackref=$ackRef", json)
   }

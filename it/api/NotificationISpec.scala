@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,70 +13,66 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package api
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.test.Helpers._
 import util.BasicBase64
 
 class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 
-  lazy val ws = app.injector.instanceOf[WSClient]
+  lazy val ws: WSClient = app.injector.instanceOf[WSClient]
 
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: Int = WiremockHelper.wiremockPort
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
   val additionalConfiguration = Map(
-    "Test.auditing.consumer.baseUri.host" -> s"$mockHost",
-    "Test.auditing.consumer.baseUri.port" -> s"$mockPort",
-    "microservice.services.auth.host" -> s"$mockHost",
+    "auditing.consumer.baseUri.host" -> mockHost,
+    "auditing.consumer.baseUri.port" -> s"$mockPort",
+    "microservice.services.auth.host" -> mockHost,
     "microservice.services.auth.port" -> s"$mockPort",
-    "microservice.services.company-registration.host" -> s"$mockHost",
+    "microservice.services.company-registration.host" -> mockHost,
     "microservice.services.company-registration.port" -> s"$mockPort",
-    "microservice.services.paye-registration.host" -> s"$mockHost",
+    "microservice.services.paye-registration.host" -> mockHost,
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "basicAuthentication.enabled" -> "true",
     "basicAuthentication.realm" -> "test",
-    "basicAuthentication.username" -> "foo",
-    "basicAuthentication.password" -> "bar"
+    "basicAuthentication.username" -> "testUser",
+    "basicAuthentication.password" -> "password",
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(additionalConfiguration)
     .build
 
-  private def client(path: String) = ws.url(s"http://localhost:$port/business-registration-notification$path").withFollowRedirects(false)
+  private def client(path: String): WSRequest = ws.url(s"http://localhost:$port/business-registration-notification$path").withFollowRedirects(false)
 
-  class Setup {
-
-  }
-
-  private def getAuth(user: String, pwd: String) = {
-    val enc = BasicBase64.encodeToString(s"${user}:${pwd}")
-    s"""Basic ${enc}"""
-  }
+  private val getAuth: String = s"Basic ${BasicBase64.encodeToString("testUser:password")}"
 
   "Notification" should {
-    def setupSimpleAuthMocks() = {
-      stubPost("/write/audit", 200, """{"x":2}""")
-      stubGet("/auth/authority", 200, """{"uri":"xxx","credentials":{"gatewayId":"xxx2"},"userDetailsLink":"xxx3","ids":"/auth/ids"}""")
-      stubGet("/auth/ids", 200, """{"internalId":"Int-xxx","externalId":"Ext-xxx"}""")
+    def setupSimpleAuthMocks(): StubMapping = {
+      stubPost("/write/audit", OK, """{"x":2}""")
+      stubGet("/auth/authority", OK, """{"uri":"xxx","credentials":{"gatewayId":"xxx2"},"userDetailsLink":"xxx3","ids":"/auth/ids"}""")
+      stubGet("/auth/ids", OK, """{"internalId":"Int-xxx","externalId":"Ext-xxx"}""")
     }
 
-    def setupFailedAuditing() = stubPost("/write/audit", 500, """{"message":"Test Error"}""")
+    def setupFailedAuditing(): StubMapping = stubPost("/write/audit", INTERNAL_SERVER_ERROR, """{"message":"Test Error"}""")
 
-    "call CR and return a success" in new Setup {
+    "call CR and return a success" in {
       setupSimpleAuthMocks()
 
       val timestamp = "2017-01-01T00:00:00"
-      val jsonBR = s"""{"regime":"corporation-tax", "timestamp":"${timestamp}", "status":"04"}"""
-      val jsonCR = s"""{"timestamp":"${timestamp}", "status":"04"}"""
+      val jsonBR = s"""{"regime":"corporation-tax", "timestamp":"$timestamp", "status":"04"}"""
+      val jsonCR = s"""{"timestamp":"$timestamp", "status":"04"}"""
 
       stubFor(
         post(urlMatching("/company-registration/corporation-tax-registration/acknowledgement-confirmation?(.*)"))
@@ -84,12 +80,12 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           .withRequestBody(equalToJson(jsonCR))
           .willReturn(
             aResponse()
-              .withStatus(200)
+              .withStatus(OK)
               .withBody(jsonCR))
       )
 
-      val response = client(s"/notification/BRCT0001").
-        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+      val response: WSResponse = client(s"/notification/BRCT0001").
+        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
         post(jsonBR).
         futureValue
 
@@ -97,12 +93,12 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
     }
 
-    "call PR and return a success on successful ETMP registration" in new Setup {
+    "call PR and return a success on successful ETMP registration" in {
       setupSimpleAuthMocks()
 
       val timestamp = "2017-01-01T00:00:00"
-      val jsonBR = s"""{"timestamp":"${timestamp}", "regime":"paye", "status":"04", "business-tax-identifier":"EMPREF0001"}"""
-      val jsonPR = s"""{"timestamp":"${timestamp}", "status":"04", "empRef":"EMPREF0001"}"""
+      val jsonBR = s"""{"timestamp":"$timestamp", "regime":"paye", "status":"04", "business-tax-identifier":"EMPREF0001"}"""
+      val jsonPR = s"""{"timestamp":"$timestamp", "status":"04", "empRef":"EMPREF0001"}"""
 
       stubFor(
         post(urlMatching("/paye-registration/registration-processed-confirmation?(.*)"))
@@ -110,17 +106,17 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           .withRequestBody(equalToJson(jsonPR))
           .willReturn(
             aResponse().
-              withStatus(200).
+              withStatus(OK).
               withBody(jsonPR)
           )
       )
 
-      val response = client(s"/notification/BRPY0001").
-        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+      val response: WSResponse = client(s"/notification/BRPY0001").
+        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
         post(jsonBR).
         futureValue
 
-      response.status shouldBe 200
+      response.status shouldBe OK
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
 
       verify(postRequestedFor(urlMatching("/write/audit"))
@@ -145,7 +141,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
       )
     }
 
-    "call PR and return a success on ETMP rejection" in new Setup {
+    "call PR and return a success on ETMP rejection" in {
       setupSimpleAuthMocks()
 
       val timestamp = "2017-01-01T00:00:00"
@@ -158,17 +154,17 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           .withRequestBody(equalToJson(jsonPR))
           .willReturn(
             aResponse().
-              withStatus(200).
+              withStatus(OK).
               withBody(jsonPR)
           )
       )
 
-      val response = client(s"/notification/BRPY0002").
-        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+      val response: WSResponse = client(s"/notification/BRPY0002").
+        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
         post(jsonBR).
         futureValue
 
-      response.status shouldBe 200
+      response.status shouldBe OK
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
 
       verify(postRequestedFor(urlMatching("/write/audit"))
@@ -192,7 +188,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
       )
     }
 
-    "handle auditing errors" in new Setup {
+    "handle auditing errors" in {
       setupSimpleAuthMocks()
       setupFailedAuditing()
 
@@ -206,23 +202,23 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           .withRequestBody(equalToJson(jsonPR))
           .willReturn(
             aResponse().
-              withStatus(200).
+              withStatus(OK).
               withBody(jsonPR)
           )
       )
 
-      val response = client(s"/notification/BRPY0002").
-        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+      val response: WSResponse = client(s"/notification/BRPY0002").
+        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
         post(jsonBR).
         futureValue
 
       verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
 
-      response.status shouldBe 200
+      response.status shouldBe OK
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
     }
 
-    "handle downstream errors" in new Setup {
+    "handle downstream errors" in {
       setupSimpleAuthMocks()
 
       val timestamp = "2017-01-01T00:00:00"
@@ -235,25 +231,28 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           .withRequestBody(equalToJson(jsonPR))
           .willReturn(
             aResponse().
-              withStatus(400).
+              withStatus(BAD_REQUEST).
               withBody(jsonPR)
           )
       )
 
-      val response = client(s"/notification/BRPY0002").
-        withHeaders("Authorization" -> getAuth("foo", "bar"), "Content-Type" -> "application/json").
+      val response: WSResponse = client(s"/notification/BRPY0002").
+        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
         post(jsonBR).
         futureValue
 
       verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
 
-      response.status shouldBe 500
+      response.status shouldBe INTERNAL_SERVER_ERROR
     }
   }
 
   "return a 401 if the creds are not valid" in {
+
+    val getAuth: String = s"Basic ${BasicBase64.encodeToString("testUser1:password1")}"
+
     val response = client(s"/notification/BRCT0001").
-      withHeaders("Authorization" -> getAuth("foo", "bar2"), "Content-Type" -> "application/json").
+      withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
       post("{}").
       futureValue
 

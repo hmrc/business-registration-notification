@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,18 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 object BasicBase64 {
   def encode(string: String): Array[Byte] = encode(string.getBytes(UTF_8))
+
   def encode(bytes: Array[Byte]): Array[Byte] = java.util.Base64.getEncoder.encode(bytes)
+
   def encodeToString(string: String) = new String(encode(string), UTF_8)
+
   def encodeToString(bytes: Array[Byte]) = new String(encode(bytes), UTF_8)
+
   def decode(string: String): Array[Byte] = decode(string.getBytes(UTF_8))
+
   def decode(bytes: Array[Byte]): Array[Byte] = java.util.Base64.getDecoder.decode(bytes)
+
   def decodeToString(string: String) = new String(decode(string), UTF_8)
+
   def decodeToString(bytes: Array[Byte]) = new String(decode(bytes), UTF_8)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package itutil
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 object WiremockHelper {
   val wiremockPort = 11111
@@ -30,19 +33,19 @@ trait WiremockHelper {
 
   import WiremockHelper._
 
-  val wmConfig = wireMockConfig().port(wiremockPort)
+  val wmConfig: WireMockConfiguration = wireMockConfig().port(wiremockPort)
   val wireMockServer = new WireMockServer(wmConfig)
 
-  def startWiremock() = {
+  def startWiremock(): Unit = {
     wireMockServer.start()
     WireMock.configureFor(wiremockHost, wiremockPort)
   }
 
-  def stopWiremock() = wireMockServer.stop()
+  def stopWiremock(): Unit = wireMockServer.stop()
 
-  def resetWiremock() = WireMock.reset()
+  def resetWiremock(): Unit = WireMock.reset()
 
-  def stubGet(url: String, status: Integer, body: String) =
+  def stubGet(url: String, status: Integer, body: String): StubMapping =
     stubFor(get(urlMatching(url))
       .willReturn(
         aResponse().
@@ -51,7 +54,7 @@ trait WiremockHelper {
       )
     )
 
-  def stubPost(url: String, status: Integer, responseBody: String) =
+  def stubPost(url: String, status: Integer, responseBody: String): StubMapping =
     stubFor(post(urlMatching(url))
       .willReturn(
         aResponse().
