@@ -22,8 +22,8 @@ private object AppDependencies {
 }
 
 object MainDependencies {
-  private val bootstrapPlay = "3.2.0"
-  private val domainVersion = "5.11.0-play-26"
+  private val bootstrapPlay = "5.12.0"
+  private val domainVersion = "6.2.0-play-26"
   private val jodaTimeVersion = "2.6.10"
 
   def apply() = Seq(
