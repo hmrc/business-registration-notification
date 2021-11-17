@@ -16,10 +16,13 @@
 
 package audit.events
 
-import org.scalatest.{Matchers, WordSpec}
+import audit.events.ProcessedNotificationEvent._
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsObject, JsValue, Json}
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-class ProcessNotificationEventSpec extends WordSpec with Matchers {
+class ProcessNotificationEventSpec extends AnyWordSpec with should.Matchers {
 
   "ProcessedNotificationEvent" should {
     "construct a valid json structure as per confluence" when {
@@ -82,7 +85,7 @@ class ProcessNotificationEventSpec extends WordSpec with Matchers {
 
         val auditEvent = new ProcessedNotificationEvent("taxRegistrationUpdateRequest", details)
 
-        val result = Json.toJson[ProcessedNotificationEvent](auditEvent)
+        val result = Json.toJson[ExtendedDataEvent](auditEvent)
 
         result.getClass shouldBe classOf[JsObject]
         (result \ "auditType").as[String] shouldBe "taxRegistrationUpdateRequest"

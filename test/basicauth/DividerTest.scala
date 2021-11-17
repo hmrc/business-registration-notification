@@ -16,10 +16,11 @@
 
 package basicauth
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import util.Divider
 
-class DividerTest extends WordSpec with Matchers {
+class DividerTest extends AnyWordSpec with should.Matchers {
 
   import Divider.IDivider
 

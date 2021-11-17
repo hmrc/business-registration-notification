@@ -16,9 +16,10 @@
 
 package basicauth
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 
-class BasicAuthCredentialsTest extends WordSpec with Matchers {
+class BasicAuthCredentialsTest extends AnyWordSpec with should.Matchers {
 
   "conversion of a known value succeeds correctly" in {
     val creds = BasicAuthCredentials.fromAuthorizationHeader(Some("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="))

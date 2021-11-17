@@ -20,7 +20,7 @@ import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import play.api.Configuration
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 

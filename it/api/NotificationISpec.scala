@@ -29,13 +29,16 @@ import util.BasicBase64
 
 class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 
-  lazy val ws: WSClient = app.injector.instanceOf[WSClient]
-
   val mockHost: String = WiremockHelper.wiremockHost
   val mockPort: Int = WiremockHelper.wiremockPort
   val mockUrl: String = s"http://$mockHost:$mockPort"
 
-  val additionalConfiguration = Map(
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(additionalConfiguration)
+    .build
+
+  def additionalConfiguration = Map(
+    "auditing.enabled" -> "true",
     "auditing.consumer.baseUri.host" -> mockHost,
     "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.auth.host" -> mockHost,
@@ -50,9 +53,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
     "basicAuthentication.password" -> "password",
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
-    .build
+  lazy val ws: WSClient = app.injector.instanceOf[WSClient]
 
   private def client(path: String): WSRequest = ws.url(s"http://localhost:$port/business-registration-notification$path").withFollowRedirects(false)
 
@@ -61,6 +62,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
   "Notification" should {
     def setupSimpleAuthMocks(): StubMapping = {
       stubPost("/write/audit", OK, """{"x":2}""")
+      stubPost("/write/audit/merged", OK, """{"x":2}""")
       stubGet("/auth/authority", OK, """{"uri":"xxx","credentials":{"gatewayId":"xxx2"},"userDetailsLink":"xxx3","ids":"/auth/ids"}""")
       stubGet("/auth/ids", OK, """{"internalId":"Int-xxx","externalId":"Ext-xxx"}""")
     }
@@ -84,10 +86,11 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
               .withBody(jsonCR))
       )
 
-      val response: WSResponse = client(s"/notification/BRCT0001").
-        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
-        post(jsonBR).
-        futureValue
+      lazy val response: WSResponse = await(
+        client(s"/notification/BRCT0001")
+          .withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json")
+          .post(jsonBR)
+      )
 
       response.status shouldBe 200
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
@@ -111,10 +114,11 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           )
       )
 
-      val response: WSResponse = client(s"/notification/BRPY0001").
-        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
-        post(jsonBR).
-        futureValue
+      lazy val response: WSResponse = await(
+        client(s"/notification/BRPY0001")
+          .withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json")
+          .post(jsonBR)
+      )
 
       response.status shouldBe OK
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
@@ -159,10 +163,11 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           )
       )
 
-      val response: WSResponse = client(s"/notification/BRPY0002").
-        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
-        post(jsonBR).
-        futureValue
+      lazy val response: WSResponse = await(
+        client(s"/notification/BRPY0002")
+          .withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json")
+          .post(jsonBR)
+      )
 
       response.status shouldBe OK
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
@@ -207,15 +212,16 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           )
       )
 
-      val response: WSResponse = client(s"/notification/BRPY0002").
-        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
-        post(jsonBR).
-        futureValue
-
-      verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
+      lazy val response: WSResponse = await(
+        client(s"/notification/BRPY0002")
+          .withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json")
+          .post(jsonBR)
+      )
 
       response.status shouldBe OK
       response.json shouldBe Json.obj("result" -> "ok", "timestamp" -> timestamp)
+
+      verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
     }
 
     "handle downstream errors" in {
@@ -236,14 +242,15 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           )
       )
 
-      val response: WSResponse = client(s"/notification/BRPY0002").
-        withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
-        post(jsonBR).
-        futureValue
-
-      verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
+      lazy val response: WSResponse = await(
+        client(s"/notification/BRPY0002")
+          .withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json")
+          .post(jsonBR)
+      )
 
       response.status shouldBe INTERNAL_SERVER_ERROR
+
+      verify(1, postRequestedFor(urlMatching("/paye-registration/registration-processed-confirmation\\?ackref=BRPY0002")))
     }
   }
 
@@ -251,10 +258,11 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 
     val getAuth: String = s"Basic ${BasicBase64.encodeToString("testUser1:password1")}"
 
-    val response = client(s"/notification/BRCT0001").
-      withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json").
-      post("{}").
-      futureValue
+    lazy val response = await(
+      client(s"/notification/BRCT0001")
+        .withHttpHeaders("Authorization" -> getAuth, "Content-Type" -> "application/json")
+        .post("{}")
+    )
 
     response.status shouldBe 401
   }

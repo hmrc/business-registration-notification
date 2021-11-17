@@ -17,20 +17,22 @@
 package itutil
 
 import org.scalatest._
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
-trait IntegrationSpecBase extends WordSpec
-  with GuiceOneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
-  with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll {
+trait IntegrationSpecBase extends AnyWordSpec
+  with GuiceOneServerPerSuite with should.Matchers with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll {
 
   override def beforeEach() = {
     resetWiremock()
+    super.beforeAll()
+
   }
 
   override def beforeAll() = {
-    super.beforeAll()
     startWiremock()
+    super.beforeAll()
   }
 
   override def afterAll() = {

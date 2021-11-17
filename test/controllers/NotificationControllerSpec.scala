@@ -17,14 +17,15 @@
 package controllers
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import com.codahale.metrics.Counter
 import com.kenshoo.play.metrics.Metrics
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
@@ -40,7 +41,7 @@ import util.ServiceDirector
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class NotificationControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar {
+class NotificationControllerSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar {
 
   val mockDirector: ServiceDirector = mock[ServiceDirector]
   val mockMetrics: MetricsService = mock[MetricsService]
@@ -50,7 +51,7 @@ class NotificationControllerSpec extends WordSpec with Matchers with GuiceOneApp
   lazy val mockControllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
   implicit val system: ActorSystem = ActorSystem()
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val materializer: Materializer = Materializer(system)
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val data: ETMPNotification = ETMPNotification(

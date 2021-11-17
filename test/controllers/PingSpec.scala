@@ -17,7 +17,8 @@
 package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
@@ -30,7 +31,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
 
-class PingSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar {
+class PingSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar {
 
   val testUserName: String = "foo"
   val testPassword: String = "bar"
