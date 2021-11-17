@@ -16,10 +16,11 @@
 
 package models
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 
-class ETMPNotificationSpec extends WordSpec with Matchers with JsonFormatValidation {
+class ETMPNotificationSpec extends AnyWordSpec with should.Matchers with JsonFormatValidation {
 
   def lineEnd(comma: Boolean): String = if (comma) "," else ""
 

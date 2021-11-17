@@ -19,7 +19,8 @@ package processors
 import models.{ETMPNotification, PAYERegistrationPost}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import services.CompanyRegistrationService
@@ -30,7 +31,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class PAYEProcessorSpec extends WordSpec with Matchers with MockitoSugar {
+class PAYEProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSugar {
 
   val mockAuditConnector: AuditConnector = mock[AuditConnector]
   val mockCompanyRegistrationService: CompanyRegistrationService = mock[CompanyRegistrationService]

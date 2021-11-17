@@ -17,12 +17,12 @@
 package processors
 
 import models.ETMPNotification
-import play.api.Logger
+import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait RegimeProcessor {
+trait RegimeProcessor extends Logging {
 
   class AuditError(msg: String) extends Exception {
     override def getMessage: String = msg
@@ -33,10 +33,10 @@ trait RegimeProcessor {
   protected def handleProcessRegimeError(e: Throwable, downstreamCall: => Future[Int], identifier: String): Future[Int] = {
     e match {
       case auditErr: AuditError =>
-        Logger.error(s"$identifier: Audit event failed because ${auditErr.getMessage}")
+        logger.error(s"$identifier: Audit event failed because ${auditErr.getMessage}")
         downstreamCall
       case err =>
-        Logger.error(s"$identifier: Unexpected error - update failed because: '${err.getMessage}'")
+        logger.error(s"$identifier: Unexpected error - update failed because: '${err.getMessage}'")
         throw err
     }
   }

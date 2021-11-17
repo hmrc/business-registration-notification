@@ -20,7 +20,8 @@ import config.Regimes
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import processors.{CTProcessor, PAYEProcessor}
@@ -28,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class ServiceDirectorSpec extends WordSpec with Matchers with MockitoSugar with Regimes {
+class ServiceDirectorSpec extends AnyWordSpec with should.Matchers with MockitoSugar with Regimes {
 
   val mockPayeProcessor: PAYEProcessor = mock[PAYEProcessor]
   val mockCTProcessor: CTProcessor = mock[CTProcessor]

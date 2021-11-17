@@ -20,19 +20,19 @@ import mocks.MockHttp
 import models.CompanyRegistrationPost
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyRegistrationConnectorSpec extends WordSpec with Matchers with MockitoSugar with MockHttp {
+class CompanyRegistrationConnectorSpec extends AnyWordSpec with should.Matchers with MockitoSugar with MockHttp {
 
   val mockHttp: HttpClient = mock[HttpClient]
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]

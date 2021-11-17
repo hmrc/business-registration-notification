@@ -16,12 +16,14 @@
 
 package models
 
-import org.scalatest.{Assertion, Matchers, WordSpec}
+import org.scalatest.Assertion
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
 trait JsonFormatValidation {
-  this: WordSpec with Matchers =>
+  this: AnyWordSpec with should.Matchers =>
 
   def shouldBeSuccess[T](expected: T, result: JsResult[T]): Assertion = {
     result match {

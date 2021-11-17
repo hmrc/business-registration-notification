@@ -20,9 +20,9 @@ import _root_.util.ServiceDirector
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import models.ETMPNotification
 import org.joda.time.{DateTime, DateTimeZone}
+import play.api.{Configuration, Logging}
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
-import play.api.{Configuration, Logger}
 import services.MetricsService
 import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -38,7 +38,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
                                        val config: Configuration,
                                        cc: ControllerComponents,
                                        director: ServiceDirector
-                                      )(implicit ec: ExecutionContext) extends BackendController(cc) with BasicAuthentication {
+                                      )(implicit ec: ExecutionContext) extends BackendController(cc) with BasicAuthentication with Logging {
 
   val authAction = new BasicAuthenticatedAction(getBasicAuthConfig, cc)
 
@@ -46,7 +46,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
-          Logger.info(s"[NotificationController] - ETMP sent request with ackref : $ackRef and status : ${notif.status} for regime : ${notif.regime}")
+          logger.info(s"[NotificationController] - ETMP sent request with ackref : $ackRef and status : ${notif.status} for regime : ${notif.regime}")
           director.goToService(ackRef, notif.regime, notif) map {
             case OK =>
               metrics.etmpNotificationCounter.inc(1)
@@ -57,17 +57,17 @@ class NotificationController @Inject()(val metrics: MetricsService,
             case otherStatus => new Status(otherStatus)
           } recover {
             case _: NotFoundException =>
-              Logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
+              logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
               metrics.ackRefNotFound.inc(1)
               metrics.clientErrorCodes.inc(1)
               NotFound(buildFailureResponse(notif.timestamp, Some("Acknowledgement reference not found")))
             case ex: ServiceUnavailableException =>
-              Logger.error(s"SERVICE UNAVAILABLE : $ex")
+              logger.error(s"SERVICE UNAVAILABLE : $ex")
               metrics.serviceNotAvailable.inc(1)
               metrics.serverErrorCodes.inc(1)
               ServiceUnavailable(buildFailureResponse(notif.timestamp))
             case ex =>
-              Logger.error(s"INTERNAL SERVER ERROR : $ex")
+              logger.error(s"INTERNAL SERVER ERROR : $ex")
               metrics.internalServerError.inc(1)
               metrics.serverErrorCodes.inc(1)
               InternalServerError(buildFailureResponse(notif.timestamp))
@@ -97,7 +97,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>
         val message = s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
-        Logger.info(message)
+        logger.info(message)
         Future.successful(
           BadRequest(
             buildFailureResponse(timestampNow, Some(message))
@@ -105,7 +105,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
         )
       case Failure(e) =>
         val message = s"could not parse body due to ${e.getMessage}"
-        Logger.warn(message)
+        logger.warn(message)
         Future.successful(
           BadRequest(
             buildFailureResponse(timestampNow, Some(message))

@@ -21,7 +21,8 @@ import mocks.MockHttp
 import models.{CompanyRegistrationPost, PAYERegistrationPost}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -29,7 +30,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyRegistrationServiceSpec extends WordSpec with Matchers with MockitoSugar with MockHttp {
+class CompanyRegistrationServiceSpec extends AnyWordSpec with should.Matchers with MockitoSugar with MockHttp {
 
   val mockCRConnector: CompanyRegistrationConnector = mock[CompanyRegistrationConnector]
   val mockPAYEConnector: PAYERegistrationConnector = mock[PAYERegistrationConnector]
