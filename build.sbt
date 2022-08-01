@@ -24,7 +24,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(integrationTestSettings())
   .settings(majorVersion := 1)
   .settings(
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.12.15",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     resolvers += Resolver.jcenterRepo,
