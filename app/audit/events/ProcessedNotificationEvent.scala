@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,21 +30,21 @@ object ProcessedNotificationEventDetail {
   implicit val writes: Writes[ProcessedNotificationEventDetail] =
     (detail: ProcessedNotificationEventDetail) => {
 
-    val taxIdentifier = detail.regime match {
-      case "paye" => "empRef"
-      case _ => "ctUtr"
+      val taxIdentifier = detail.regime match {
+        case "paye" => "empRef"
+        case _ => "ctUtr"
+      }
+
+      val notificationWrites = (
+        (__ \ "acknowledgementReference").write[String] and
+          (__ \ "timestamp").write[String] and
+          (__ \ "regime").write[String] and
+          (__ \ taxIdentifier).writeNullable[String] and
+          (__ \ "status").write[String]
+        ) (unlift(ProcessedNotificationEventDetail.unapply))
+
+      Json.toJson(detail)(notificationWrites).as[JsObject]
     }
-
-    val notificationWrites = (
-      (__ \ "acknowledgementReference").write[String] and
-        (__ \ "timestamp").write[String] and
-        (__ \ "regime").write[String] and
-        (__ \ taxIdentifier).writeNullable[String] and
-        (__ \ "status").write[String]
-      ) (unlift(ProcessedNotificationEventDetail.unapply))
-
-    Json.toJson(detail)(notificationWrites).as[JsObject]
-  }
 }
 
 class ProcessedNotificationEvent(auditRef: String, details: ProcessedNotificationEventDetail, transactionName: Option[String] = None)
