@@ -24,12 +24,10 @@ private object AppDependencies {
 object MainDependencies {
   private val bootstrapPlay = "5.16.0"
   private val domainVersion = "8.1.0-play-28"
-  private val jodaTimeVersion = "2.9.2"
 
   def apply() = Seq(
     "uk.gov.hmrc" %% "bootstrap-backend-play-28" % bootstrapPlay,
-    "uk.gov.hmrc" %% "domain" % domainVersion,
-    "com.typesafe.play" %% "play-json-joda" % jodaTimeVersion
+    "uk.gov.hmrc" %% "domain" % domainVersion
   )
 }
 

@@ -19,7 +19,6 @@ package controllers
 import _root_.util.ServiceDirector
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import models.ETMPNotification
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.{Configuration, Logging}
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
@@ -28,6 +27,7 @@ import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Date
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -86,7 +86,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
   def timestampNow: String = {
     val timeStampFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
     val format: SimpleDateFormat = new SimpleDateFormat(timeStampFormat)
-    format.format(new Date(DateTime.now(DateTimeZone.UTC).getMillis))
+    format.format(new Date(Instant.now.toEpochMilli))
   }
 
   override def withJsonBody[T](f: T => Future[Result])
