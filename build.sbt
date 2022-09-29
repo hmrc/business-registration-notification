@@ -8,7 +8,7 @@ val appName: String = "business-registration-notification"
 
 lazy val scoverageSettings = Seq(
   ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;view.*;config.*;.*(AuthService|BuildInfo|Routes).*",
-  ScoverageKeys.coverageMinimum := 80,
+  ScoverageKeys.coverageMinimumStmtTotal := 80,
   ScoverageKeys.coverageFailOnMinimum := false,
   ScoverageKeys.coverageHighlighting := true
 )
