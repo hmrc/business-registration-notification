@@ -16,9 +16,9 @@
 
 package audit.events
 
+import models.ETMPNotification
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Writes, _}
-import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import play.api.libs.json._
 
 case class ProcessedNotificationEventDetail(acknowledgementReference: String,
                                             timestamp: String,
@@ -27,6 +27,17 @@ case class ProcessedNotificationEventDetail(acknowledgementReference: String,
                                             status: String)
 
 object ProcessedNotificationEventDetail {
+
+  def apply(ackRef: String, data: ETMPNotification): ProcessedNotificationEventDetail = {
+    ProcessedNotificationEventDetail(
+      ackRef,
+      data.timestamp,
+      data.regime,
+      data.taxId,
+      data.status
+    )
+  }
+
   implicit val writes: Writes[ProcessedNotificationEventDetail] =
     (detail: ProcessedNotificationEventDetail) => {
 
@@ -45,11 +56,4 @@ object ProcessedNotificationEventDetail {
 
       Json.toJson(detail)(notificationWrites).as[JsObject]
     }
-}
-
-class ProcessedNotificationEvent(auditRef: String, details: ProcessedNotificationEventDetail, transactionName: Option[String] = None)
-  extends RegistrationAuditEvent(auditRef, Json.toJson(details).as[JsObject], transactionName)
-
-object ProcessedNotificationEvent {
-  implicit val format: OFormat[ExtendedDataEvent] = Json.format[ExtendedDataEvent]
 }

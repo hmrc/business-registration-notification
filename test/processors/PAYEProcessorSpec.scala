@@ -16,6 +16,8 @@
 
 package processors
 
+import audit.AuditService
+import audit.events.ProcessedNotificationEventDetail
 import models.{ETMPNotification, PAYERegistrationPost}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
@@ -25,7 +27,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PAYEProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSugar {
 
-  val mockAuditConnector: AuditConnector = mock[AuditConnector]
+  val mockAuditService: AuditService = mock[AuditService]
   val mockCompanyRegistrationService: CompanyRegistrationService = mock[CompanyRegistrationService]
 
   val testEtmpNotification: ETMPNotification =
@@ -47,7 +48,7 @@ class PAYEProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSug
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   class Setup {
-    val testProcessor = new PAYEProcessor(mockAuditConnector, mockCompanyRegistrationService)
+    val testProcessor = new PAYEProcessor(mockAuditService, mockCompanyRegistrationService)
   }
 
   "notificationToCRPost" should {
@@ -65,7 +66,15 @@ class PAYEProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSug
         when(mockCompanyRegistrationService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditService.sendEvent(
+          auditType = ArgumentMatchers.eq("rejectedTaxServiceRegistration"),
+          detail = ArgumentMatchers.eq(ProcessedNotificationEventDetail("testAckRef", testEtmpNotification)),
+          transactionName = ArgumentMatchers.eq(Some("payeRegistrationUpdateRequest"))
+        )(
+          hc = ArgumentMatchers.any[HeaderCarrier](),
+          ec = ArgumentMatchers.any[ExecutionContext](),
+          fmt = ArgumentMatchers.eq(ProcessedNotificationEventDetail.writes)
+        ))
           .thenReturn(Future.successful(Success))
 
         val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
@@ -75,7 +84,15 @@ class PAYEProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSug
         when(mockCompanyRegistrationService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditService.sendEvent(
+          auditType = ArgumentMatchers.eq("rejectedTaxServiceRegistration"),
+          detail = ArgumentMatchers.eq(ProcessedNotificationEventDetail("testAckRef", testEtmpNotification)),
+          transactionName = ArgumentMatchers.eq(Some("payeRegistrationUpdateRequest"))
+        )(
+          hc = ArgumentMatchers.any[HeaderCarrier](),
+          ec = ArgumentMatchers.any[ExecutionContext](),
+          fmt = ArgumentMatchers.eq(ProcessedNotificationEventDetail.writes)
+        ))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
         val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
@@ -85,7 +102,15 @@ class PAYEProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSug
         when(mockCompanyRegistrationService.sendToPAYERegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(OK))
 
-        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditService.sendEvent(
+          auditType = ArgumentMatchers.eq("rejectedTaxServiceRegistration"),
+          detail = ArgumentMatchers.eq(ProcessedNotificationEventDetail("testAckRef", testEtmpNotification)),
+          transactionName = ArgumentMatchers.eq(Some("payeRegistrationUpdateRequest"))
+        )(
+          hc = ArgumentMatchers.any[HeaderCarrier](),
+          ec = ArgumentMatchers.any[ExecutionContext](),
+          fmt = ArgumentMatchers.eq(ProcessedNotificationEventDetail.writes)
+        ))
           .thenReturn(Future.failed(new RuntimeException))
 
         val result: Int = await(testProcessor.processRegime("testAckRef", testEtmpNotification))
