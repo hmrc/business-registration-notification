@@ -20,7 +20,7 @@ import sbt._
 private object AppDependencies {
 
   val playVersion             =  "-play-28"
-  val bootstrapPlay           =  "7.4.0"
+  val bootstrapPlay           =  "7.7.0"
   val domainVersion           = s"8.1.0$playVersion"
   val scalaTestPlusVersion    =  "5.1.0"
   val flexmarkVersion         =  "0.62.2"
