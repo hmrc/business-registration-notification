@@ -16,29 +16,26 @@
 
 package processors
 
-import audit.builders.AuditBuilding
-import audit.events.ProcessedNotificationEvent
+import audit.AuditService
+import audit.events.ProcessedNotificationEventDetail
 import models.{CompanyRegistrationPost, ETMPNotification}
 import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CTProcessor @Inject()(auditConnector: AuditConnector,
+class CTProcessor @Inject()(auditService: AuditService,
                             registrationService: CompanyRegistrationService
-                           )(implicit ec: ExecutionContext) extends RegimeProcessor with AuditBuilding {
+                           )(implicit ec: ExecutionContext) extends RegimeProcessor {
 
   private[processors] def notificationToCRPost(notification: ETMPNotification): CompanyRegistrationPost = {
     CompanyRegistrationPost(notification.taxId, notification.timestamp, notification.status)
   }
 
   override def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int] = {
-    auditConnector.sendExtendedEvent(
-      new ProcessedNotificationEvent("taxRegistrationUpdateRequest", buildAuditEventDetail(ackRef, data))
-    ) recover {
+    auditService.sendEvent("taxRegistrationUpdateRequest", ProcessedNotificationEventDetail(ackRef, data)) recover {
       case e => throw new AuditError(e.getMessage)
     } flatMap {
       _ => registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data))

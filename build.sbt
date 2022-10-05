@@ -8,8 +8,8 @@ val appName: String = "business-registration-notification"
 
 lazy val scoverageSettings = Seq(
   ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;view.*;config.*;.*(AuthService|BuildInfo|Routes).*",
-  ScoverageKeys.coverageMinimum := 80,
-  ScoverageKeys.coverageFailOnMinimum := false,
+  ScoverageKeys.coverageMinimumStmtTotal := 90,
+  ScoverageKeys.coverageFailOnMinimum := true,
   ScoverageKeys.coverageHighlighting := true
 )
 
@@ -24,6 +24,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(integrationTestSettings())
   .settings(majorVersion := 1)
   .settings(
+    scalacOptions += "-Xlint:-unused",
     scalaVersion := "2.12.15",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,

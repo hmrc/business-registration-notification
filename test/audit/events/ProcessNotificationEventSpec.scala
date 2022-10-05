@@ -16,11 +16,9 @@
 
 package audit.events
 
-import audit.events.ProcessedNotificationEvent._
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import play.api.libs.json.{JsObject, Json}
 
 class ProcessNotificationEventSpec extends AnyWordSpec with should.Matchers {
 
@@ -71,25 +69,6 @@ class ProcessNotificationEventSpec extends AnyWordSpec with should.Matchers {
         val result = Json.toJson[ProcessedNotificationEventDetail](testModel)
         result.getClass shouldBe classOf[JsObject]
         result shouldBe Json.parse(expected)
-      }
-    }
-
-    "have the correct segment in the json" when {
-      "constructing the full audit event" in {
-        val details = ProcessedNotificationEventDetail(
-          "BRCT123456789",
-          "2001-12-31T12:00:00Z",
-          "corporation-tax",
-          Some("1234567890"),
-          "04")
-
-        val auditEvent = new ProcessedNotificationEvent("taxRegistrationUpdateRequest", details)
-
-        val result = Json.toJson[ExtendedDataEvent](auditEvent)
-
-        result.getClass shouldBe classOf[JsObject]
-        (result \ "auditType").as[String] shouldBe "taxRegistrationUpdateRequest"
-        (result \ "detail").as[JsValue] shouldBe Json.toJson(details)
       }
     }
   }

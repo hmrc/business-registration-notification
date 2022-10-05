@@ -16,21 +16,20 @@
 
 package processors
 
-import audit.builders.AuditBuilding
-import audit.events.ProcessedNotificationEvent
+import audit.AuditService
+import audit.events.ProcessedNotificationEventDetail
 import constants.Outcome
 import models.{ETMPNotification, PAYERegistrationPost}
 import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PAYEProcessor @Inject()(auditConnector: AuditConnector,
+class PAYEProcessor @Inject()(auditService: AuditService,
                               registrationService: CompanyRegistrationService
-                             )(implicit ec: ExecutionContext) extends RegimeProcessor with AuditBuilding {
+                             )(implicit ec: ExecutionContext) extends RegimeProcessor {
 
   private[processors] def notificationToPAYEPost(notification: ETMPNotification): PAYERegistrationPost = {
     PAYERegistrationPost(notification.taxId, notification.timestamp, notification.status)
@@ -40,10 +39,7 @@ class PAYEProcessor @Inject()(auditConnector: AuditConnector,
 
     val auditRef = if (Outcome.successfulOutcome(data)) "successfulTaxServiceRegistration" else "rejectedTaxServiceRegistration"
 
-    auditConnector.sendExtendedEvent(
-      new ProcessedNotificationEvent(
-        auditRef, buildAuditEventDetail(ackRef, data), Some("payeRegistrationUpdateRequest"))
-    ) recover {
+    auditService.sendEvent(auditRef, ProcessedNotificationEventDetail(ackRef, data), Some("payeRegistrationUpdateRequest")) recover {
       case e => throw new AuditError(e.getMessage)
     } flatMap {
       _ => registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data))

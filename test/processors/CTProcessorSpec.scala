@@ -16,6 +16,8 @@
 
 package processors
 
+import audit.AuditService
+import audit.events.ProcessedNotificationEventDetail
 import models.{CompanyRegistrationPost, ETMPNotification}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
@@ -34,7 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CTProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSugar {
 
-  val mockAuditConnector: AuditConnector = mock[AuditConnector]
+  val mockAuditService: AuditService = mock[AuditService]
   val mockCompanyRegistrationService: CompanyRegistrationService = mock[CompanyRegistrationService]
 
   val testEtmpNotification: ETMPNotification =
@@ -59,7 +61,7 @@ class CTProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSugar
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   class Setup {
-    val testProcessor = new CTProcessor(mockAuditConnector, mockCompanyRegistrationService)
+    val testProcessor = new CTProcessor(mockAuditService, mockCompanyRegistrationService)
   }
 
   "notificationToCRPost" should {
@@ -75,7 +77,15 @@ class CTProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSugar
     "return an OK int" when {
       "the audit event fails but still sends the data to CR" in new Setup {
 
-        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditService.sendEvent(
+          auditType = ArgumentMatchers.eq("taxRegistrationUpdateRequest"),
+          detail = ArgumentMatchers.eq(ProcessedNotificationEventDetail("testAckRef", testEtmpNotification)),
+          transactionName = ArgumentMatchers.any()
+        )(
+          hc = ArgumentMatchers.any[HeaderCarrier](),
+          ec = ArgumentMatchers.any[ExecutionContext](),
+          fmt = ArgumentMatchers.eq(ProcessedNotificationEventDetail.writes)
+        ))
           .thenReturn(Future.failed(Failure("audit failed", Some(new Throwable))))
 
         when(mockCompanyRegistrationService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -86,7 +96,15 @@ class CTProcessorSpec extends AnyWordSpec with should.Matchers with MockitoSugar
       }
 
       "the audit event succeeds and sends the data to CR" in new Setup {
-        when(mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[ExecutionContext]()))
+        when(mockAuditService.sendEvent(
+          auditType = ArgumentMatchers.eq("taxRegistrationUpdateRequest"),
+          detail = ArgumentMatchers.eq(ProcessedNotificationEventDetail("testAckRef", testEtmpNotification)),
+          transactionName = ArgumentMatchers.any()
+        )(
+          hc = ArgumentMatchers.any[HeaderCarrier](),
+          ec = ArgumentMatchers.any[ExecutionContext](),
+          fmt = ArgumentMatchers.eq(ProcessedNotificationEventDetail.writes)
+        ))
           .thenReturn(Future.successful(Success))
 
         when(mockCompanyRegistrationService.sendToCompanyRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))

@@ -18,51 +18,30 @@ import play.core.PlayVersion
 import sbt._
 
 private object AppDependencies {
-  def apply(): Seq[ModuleID] = MainDependencies() ++ UnitTestDependencies() ++ IntegrationTestDependencies()
-}
 
-object MainDependencies {
-  private val bootstrapPlay = "5.16.0"
-  private val domainVersion = "8.1.0-play-28"
+  val playVersion             =  "-play-28"
+  val bootstrapPlay           =  "7.7.0"
+  val domainVersion           = s"8.1.0$playVersion"
+  val scalaTestPlusVersion    =  "5.1.0"
+  val flexmarkVersion         =  "0.62.2"
+  val scalatestVersion        =  "3.2.12"
+  val scalatestMockitoVersion =  scalatestVersion + ".0"
+  val wiremockVersion         =  "2.33.2"
 
-  def apply() = Seq(
-    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % bootstrapPlay,
-    "uk.gov.hmrc" %% "domain" % domainVersion
-  )
-}
-
-trait TestDependencies {
-  val scalaTestPlusVersion = "5.1.0"
-  val flexmarkVersion = "0.36.8"
-  val mockitoCoreVersion = "4.0.0"
-  val scalatestMockitoVersion = "3.2.10.0"
-  val wiremockVersion = "2.31.0"
-
-  val scope: Configuration
-  val test: Seq[ModuleID]
-
-  lazy val coreTestDependencies = Seq(
-    "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
-    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion % scope,
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-    "org.mockito" % "mockito-core" % mockitoCoreVersion % scope,
-    "org.scalatestplus" %% "mockito-3-4" % scalatestMockitoVersion % scope
-  )
-}
-
-object UnitTestDependencies extends TestDependencies {
-  override val scope = Test
-  override val test: Seq[ModuleID] = coreTestDependencies
-
-  def apply(): Seq[ModuleID] = test
-}
-
-object IntegrationTestDependencies extends TestDependencies {
-  override val scope = IntegrationTest
-  override val test: Seq[ModuleID] = coreTestDependencies ++ Seq(
-    "com.github.tomakehurst" % "wiremock-jre8-standalone" % wiremockVersion % scope
+  val compile = Seq(
+    "uk.gov.hmrc"               %% s"bootstrap-backend$playVersion"     % bootstrapPlay,
+    "uk.gov.hmrc"               %%  "domain"                            % domainVersion
   )
 
-  def apply(): Seq[ModuleID] = test
+  val test = Seq(
+    "org.scalatest"             %%  "scalatest"                         % scalatestVersion            % "test, it",
+    "org.scalatestplus.play"    %%  "scalatestplus-play"                % scalaTestPlusVersion        % "test, it",
+    "org.scalatestplus"         %%  "mockito-4-5"                       % scalatestMockitoVersion     % "test, it",
+    "com.vladsch.flexmark"      %   "flexmark-all"                      % flexmarkVersion             % "test, it",
+    "com.typesafe.play"         %%  "play-test"                         % PlayVersion.current         % "test, it",
+    "com.github.tomakehurst"    %   "wiremock-jre8-standalone"          % wiremockVersion             % "it"
+  )
+
+  def apply(): Seq[ModuleID] = compile ++ test
 }
 
