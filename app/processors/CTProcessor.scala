@@ -41,9 +41,9 @@ class CTProcessor @Inject()(auditService: AuditService,
       _ => registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data))
     } recoverWith {
       case e => handleProcessRegimeError(
-        e,
-        registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data)),
-        "[CTProcessor] - [processRegime]"
+        e = e,
+        downstreamCall = registrationService.sendToCompanyRegistration(ackRef, notificationToCRPost(data)),
+        methodName = "processRegime"
       )
     }
   }

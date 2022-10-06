@@ -32,10 +32,6 @@ class CompanyRegistrationConnector @Inject()(http: HttpClient,
 
   lazy val companyRegUrl = s"${servicesConfig.baseUrl("company-registration")}/company-registration"
 
-  protected def mode: Mode = Mode.Prod
-
-  protected def runModeConfiguration: Configuration = configuration
-
   def processAcknowledgment(ackRef: String,
                             crPost: CompanyRegistrationPost
                            )(implicit hc: HeaderCarrier,

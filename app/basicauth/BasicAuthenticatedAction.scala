@@ -23,15 +23,6 @@ import play.api.mvc._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class PassThroughAction @Inject()(cc: ControllerComponents) extends ActionBuilder[Request, AnyContent] with ActionFilter[Request] {
-
-  override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
-  override protected val executionContext: ExecutionContext = cc.executionContext
-
-  def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(None)
-}
-
 class BasicAuthenticatedAction(authConfig: BasicAuthenticationFilterConfiguration, cc: ControllerComponents)
   extends ActionBuilder[Request, AnyContent]
     with ActionFilter[Request] {
@@ -81,22 +72,3 @@ trait BasicAuthentication {
     new BasicAuthenticationFilterConfiguration(realm, enabled, username, password)
   }
 }
-
-//object BasicAuthenticationFilterConfiguration extends RunMode {
-//  /* Required in app-config - the password MUST be encrypted by WebOps
-//    basicAuthentication.enabled: true
-//    basicAuthentication.realm: 'Production'
-//    basicAuthentication.username: 'xxx'
-//    basicAuthentication.password: 'yyy'
-//  */
-//  def parse(mode: Mode, configuration: Configuration): BasicAuthenticationFilterConfiguration = {
-//    def key(k: String) = s"basicAuthentication.$k"
-//
-//    val enabled = mustGetConfigString(mode, configuration, key("enabled")).toBoolean
-//    val realm = mustGetConfigString(mode, configuration, key("realm"))
-//    val username = mustGetConfigString(mode, configuration, key("username"))
-//    val password = mustGetConfigString(mode, configuration, key("password"))
-//
-//    BasicAuthenticationFilterConfiguration(realm,enabled,username,password)
-//  }
-//}

@@ -45,9 +45,9 @@ class PAYEProcessor @Inject()(auditService: AuditService,
       _ => registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data))
     } recoverWith {
       case err => handleProcessRegimeError(
-        err,
-        registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data)),
-        "[PAYEProcessor] - [processRegime]"
+        e = err,
+        downstreamCall = registrationService.sendToPAYERegistration(ackRef, notificationToPAYEPost(data)),
+        methodName = "processRegime"
       )
     }
   }

@@ -18,7 +18,6 @@ package util
 
 import config.Regimes
 import models.ETMPNotification
-import play.api.Logging
 import processors.{CTProcessor, PAYEProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -34,7 +33,7 @@ class ServiceDirector @Inject()(val payeRegimeProcessor: PAYEProcessor,
       case CORPORATION_TAX => ctRegimeProcessor.processRegime(ackRef, data)
       case PAYE => payeRegimeProcessor.processRegime(ackRef, data)
       case _ =>
-        logger.info(s"[ServiceDirector] - [goToService] : An unsupported tax regime was presented")
+        logger.info(s"[goToService] An unsupported tax regime was presented")
         Future.successful(INVALID_REGIME)
     }
   }
