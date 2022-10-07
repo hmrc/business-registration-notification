@@ -16,10 +16,10 @@
 
 package controllers
 
-import _root_.util.ServiceDirector
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
 import models.ETMPNotification
-import play.api.{Configuration, Logging}
+import play.api.Configuration
+import _root_.util.{Logging, ServiceDirector}
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
 import services.MetricsService
@@ -46,7 +46,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
     implicit request =>
       withJsonBody[ETMPNotification] {
         notif =>
-          logger.info(s"[NotificationController] - ETMP sent request with ackref : $ackRef and status : ${notif.status} for regime : ${notif.regime}")
+          logger.info(s"[processNotification] ETMP sent request with ackref : $ackRef and status : ${notif.status} for regime : ${notif.regime}")
           director.goToService(ackRef, notif.regime, notif) map {
             case OK =>
               metrics.etmpNotificationCounter.inc(1)
@@ -57,17 +57,17 @@ class NotificationController @Inject()(val metrics: MetricsService,
             case otherStatus => new Status(otherStatus)
           } recover {
             case _: NotFoundException =>
-              logger.info("[NotificationController] - [processNotification] : Acknowledgement reference not found")
+              logger.info("[processNotification] Acknowledgement reference not found")
               metrics.ackRefNotFound.inc(1)
               metrics.clientErrorCodes.inc(1)
               NotFound(buildFailureResponse(notif.timestamp, Some("Acknowledgement reference not found")))
             case ex: ServiceUnavailableException =>
-              logger.error(s"SERVICE UNAVAILABLE : $ex")
+              logger.error(s"[processNotification] SERVICE UNAVAILABLE : $ex")
               metrics.serviceNotAvailable.inc(1)
               metrics.serverErrorCodes.inc(1)
               ServiceUnavailable(buildFailureResponse(notif.timestamp))
             case ex =>
-              logger.error(s"INTERNAL SERVER ERROR : $ex")
+              logger.error(s"[processNotification] INTERNAL SERVER ERROR : $ex")
               metrics.internalServerError.inc(1)
               metrics.serverErrorCodes.inc(1)
               InternalServerError(buildFailureResponse(notif.timestamp))
@@ -96,7 +96,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>
-        val message = s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
+        val message = s"[processNotification] Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
         logger.info(message)
         Future.successful(
           BadRequest(
@@ -104,7 +104,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
           )
         )
       case Failure(e) =>
-        val message = s"could not parse body due to ${e.getMessage}"
+        val message = s"[processNotification] could not parse body due to ${e.getMessage}"
         logger.warn(message)
         Future.successful(
           BadRequest(

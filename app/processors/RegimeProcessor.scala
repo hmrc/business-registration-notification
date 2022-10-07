@@ -17,7 +17,7 @@
 package processors
 
 import models.ETMPNotification
-import play.api.Logging
+import util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -30,13 +30,13 @@ trait RegimeProcessor extends Logging {
 
   def processRegime(ackRef: String, data: ETMPNotification)(implicit hc: HeaderCarrier): Future[Int]
 
-  protected def handleProcessRegimeError(e: Throwable, downstreamCall: => Future[Int], identifier: String): Future[Int] = {
+  protected def handleProcessRegimeError(e: Throwable, downstreamCall: => Future[Int], methodName: String): Future[Int] = {
     e match {
       case auditErr: AuditError =>
-        logger.error(s"$identifier: Audit event failed because ${auditErr.getMessage}")
+        logger.error(s"[$methodName] Audit event failed because ${auditErr.getMessage}")
         downstreamCall
       case err =>
-        logger.error(s"$identifier: Unexpected error - update failed because: '${err.getMessage}'")
+        logger.error(s"[$methodName] Unexpected error - update failed because: '${err.getMessage}'")
         throw err
     }
   }

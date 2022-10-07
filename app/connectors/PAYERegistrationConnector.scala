@@ -33,10 +33,6 @@ class PAYERegistrationConnector @Inject()(http: HttpClient,
 
   lazy val payeRegUrl = s"${servicesConfig.baseUrl("paye-registration")}/paye-registration"
 
-  protected def mode: Mode = Mode.Prod
-
-  protected def runModeConfiguration: Configuration = configuration
-
   def processAcknowledgement(ackRef: String,
                              payePost: PAYERegistrationPost
                             )(implicit hc: HeaderCarrier,
