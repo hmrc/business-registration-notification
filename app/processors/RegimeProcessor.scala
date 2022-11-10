@@ -17,8 +17,8 @@
 package processors
 
 import models.ETMPNotification
-import util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
+import util.Logging
 
 import scala.concurrent.Future
 

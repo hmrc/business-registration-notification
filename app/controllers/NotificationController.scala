@@ -16,20 +16,21 @@
 
 package controllers
 
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.Date
+
+import _root_.util.{Logging, ServiceDirector}
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
+import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import play.api.Configuration
-import _root_.util.{Logging, ServiceDirector}
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request, Result}
 import services.MetricsService
 import uk.gov.hmrc.http.{NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.util.Date
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 

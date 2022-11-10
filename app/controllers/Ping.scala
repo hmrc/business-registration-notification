@@ -17,12 +17,11 @@
 package controllers
 
 import basicauth.{BasicAuthenticatedAction, BasicAuthentication}
+import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class Ping @Inject()(val config: Configuration,

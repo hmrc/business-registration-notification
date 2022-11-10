@@ -19,11 +19,11 @@ package processors
 import audit.AuditService
 import audit.events.ProcessedNotificationEventDetail
 import constants.Outcome
+import javax.inject.{Inject, Singleton}
 import models.{ETMPNotification, PAYERegistrationPost}
 import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

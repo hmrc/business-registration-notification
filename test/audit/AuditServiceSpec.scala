@@ -16,6 +16,9 @@
 
 package audit
 
+import java.time.Instant
+import java.util.UUID
+
 import audit.events.ProcessedNotificationEventDetail
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
@@ -31,8 +34,6 @@ import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-import java.time.Instant
-import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuditServiceSpec extends PlaySpec with MockitoSugar with DefaultAwaitTimeout {

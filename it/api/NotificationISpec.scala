@@ -237,7 +237,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
           .withRequestBody(equalToJson(jsonPR))
           .willReturn(
             aResponse().
-              withStatus(BAD_REQUEST).
+              withStatus(INTERNAL_SERVER_ERROR).
               withBody(jsonPR)
           )
       )

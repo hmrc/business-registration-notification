@@ -16,27 +16,26 @@
 
 package connectors
 
+import connectors.httpParsers.BaseHttpReads
+import javax.inject.{Inject, Singleton}
 import models.CompanyRegistrationPost
-import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CompanyRegistrationConnector @Inject()(http: HttpClient,
-                                             servicesConfig: ServicesConfig,
-                                             configuration: Configuration) {
+class CompanyRegistrationConnector @Inject()(val http: HttpClient, servicesConfig: ServicesConfig)(implicit val ec: ExecutionContext)
+  extends BaseConnector with BaseHttpReads {
 
   lazy val companyRegUrl = s"${servicesConfig.baseUrl("company-registration")}/company-registration"
 
-  def processAcknowledgment(ackRef: String,
-                            crPost: CompanyRegistrationPost
-                           )(implicit hc: HeaderCarrier,
-                             ec: ExecutionContext): Future[HttpResponse] = {
-    val json = Json.toJson(crPost)
-    http.POST[JsValue, HttpResponse](s"$companyRegUrl/corporation-tax-registration/acknowledgement-confirmation?ackref=$ackRef", json)
-  }
+  def processAcknowledgment(ackRef: String, crPost: CompanyRegistrationPost)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    try {
+    http.POST[CompanyRegistrationPost, HttpResponse](s"$companyRegUrl/corporation-tax-registration/acknowledgement-confirmation?ackref=$ackRef", crPost)(CompanyRegistrationPost.format, rawReads, hc, ec)
+  } catch {
+      case ex: Exception =>
+        logger.error(s"[processAcknowledgement] - Error posting processAcknowledgement - ${ex.getMessage}", ex)
+        Future.failed(ex)
+    }
 }
