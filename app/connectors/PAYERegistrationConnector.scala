@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PAYERegistrationConnector @Inject()(val http: HttpClient, servicesConfig: ServicesConfig)(implicit val ec: ExecutionContext)
-  extends BaseConnector with BaseHttpReads {
+  extends BaseHttpReads {
   lazy val payeRegUrl = s"${servicesConfig.baseUrl("paye-registration")}/paye-registration"
 
   def processAcknowledgement(ackRef: String, payePost: PAYERegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] =

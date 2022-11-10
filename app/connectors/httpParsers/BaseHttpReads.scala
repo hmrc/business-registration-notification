@@ -16,37 +16,11 @@
 
 package connectors.httpParsers
 
-import connectors.BaseConnector
-import play.api.libs.json.Reads
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import util.Logging
 
-import scala.util.{Failure, Success, Try}
+trait BaseHttpReads extends Logging {
 
-trait BaseHttpReads extends Logging { _: BaseConnector =>
-
-  val rawReads: HttpReads[HttpResponse] = (_: String, _:String, response: HttpResponse) => response
-
-  def jsonParse[T](response: HttpResponse)(functionName: String,
-                                           regId: Option[String] = None,
-                                           txId: Option[String] = None)(implicit reads: Reads[T], mf: Manifest[T]): T =
-    Try(response.json.as[T]) match {
-      case Success(t) => t
-      case Failure(e) =>
-        logger.error(s"[$functionName] JSON returned could not be parsed to ${mf.runtimeClass.getTypeName} model${logContext(regId, txId)}")
-        throw e
-    }
-
-  def unexpectedStatusHandling[T](defaultResult: => Option[T] = None)(functionName: String,
-                                                                      url: String,
-                                                                      status: Int,
-                                                                      regId: Option[String] = None,
-                                                                      transactionId: Option[String] = None): T = {
-    logger.error(s"[$functionName] Calling url: '$url' returned unexpected status: '$status'${logContext(regId, transactionId)}")
-    defaultResult.fold(throw unexpectedStatusException(url, status, regId, transactionId))(identity)
-  }
-
-  def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
-    new Exception(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+  val rawReads: HttpReads[HttpResponse] = (_: String, _: String, response: HttpResponse) => response
 
 }

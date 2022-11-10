@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CompanyRegistrationConnector @Inject()(val http: HttpClient, servicesConfig: ServicesConfig)(implicit val ec: ExecutionContext)
-  extends BaseConnector with BaseHttpReads {
+  extends BaseHttpReads {
 
   lazy val companyRegUrl = s"${servicesConfig.baseUrl("company-registration")}/company-registration"
 
