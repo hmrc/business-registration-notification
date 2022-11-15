@@ -17,10 +17,10 @@
 package services
 
 import connectors.{CompanyRegistrationConnector, PAYERegistrationConnector}
+import javax.inject.{Inject, Singleton}
 import models.{CompanyRegistrationPost, PAYERegistrationPost}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

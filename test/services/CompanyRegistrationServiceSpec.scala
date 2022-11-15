@@ -73,8 +73,7 @@ class CompanyRegistrationServiceSpec extends AnyWordSpec with should.Matchers wi
       when(mockPAYEConnector.processAcknowledgement(
         ArgumentMatchers.eq("testAckRef"),
         ArgumentMatchers.eq(data)
-      )(ArgumentMatchers.any(),
-        ArgumentMatchers.any[ExecutionContext])).thenReturn(Future.successful(response))
+      )(ArgumentMatchers.any())).thenReturn(Future.successful(response))
 
       val result: Int = await(testService.sendToPAYERegistration("testAckRef", data))
       result shouldBe OK

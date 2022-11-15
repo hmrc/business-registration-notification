@@ -28,7 +28,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import services.CompanyRegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Failure, Success}
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -17,11 +17,11 @@
 package util
 
 import config.Regimes
+import javax.inject.{Inject, Singleton}
 import models.ETMPNotification
 import processors.{CTProcessor, PAYEProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 @Singleton

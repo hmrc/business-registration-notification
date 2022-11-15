@@ -16,28 +16,26 @@
 
 package connectors
 
+import connectors.httpParsers.BaseHttpReads
 import javax.inject.{Inject, Singleton}
 import models.PAYERegistrationPost
-import play.api.{Configuration, Mode}
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PAYERegistrationConnector @Inject()(http: HttpClient,
-                                          configuration: Configuration,
-                                          servicesConfig: ServicesConfig) {
-
+class PAYERegistrationConnector @Inject()(val http: HttpClient, servicesConfig: ServicesConfig)(implicit val ec: ExecutionContext)
+  extends BaseHttpReads {
   lazy val payeRegUrl = s"${servicesConfig.baseUrl("paye-registration")}/paye-registration"
 
-  def processAcknowledgement(ackRef: String,
-                             payePost: PAYERegistrationPost
-                            )(implicit hc: HeaderCarrier,
-                              ec: ExecutionContext): Future[HttpResponse] = {
-    val json = Json.toJson(payePost)
-    http.POST[JsValue, HttpResponse](s"$payeRegUrl/registration-processed-confirmation?ackref=$ackRef", json)
-  }
+  def processAcknowledgement(ackRef: String, payePost: PAYERegistrationPost)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+
+    try {
+      http.POST[PAYERegistrationPost, HttpResponse](s"$payeRegUrl/registration-processed-confirmation?ackref=$ackRef", payePost)(PAYERegistrationPost.format,rawReads, hc, ec)
+    } catch {
+      case ex: Exception =>
+        logger.error(s"[processAcknowledgement] - Error posting processAcknowledgement - ${ex.getMessage}", ex)
+        Future.failed(ex)
+    }
 }

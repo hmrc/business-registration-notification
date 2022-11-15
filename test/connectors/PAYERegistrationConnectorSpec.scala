@@ -43,7 +43,7 @@ class PAYERegistrationConnectorSpec extends AnyWordSpec with should.Matchers wit
 
   class Setup {
 
-    object TestConnector extends PAYERegistrationConnector(mockHttp, mockConfig, mockServicesConfig) {
+    object TestConnector extends PAYERegistrationConnector(mockHttp, mockServicesConfig) {
       override lazy val payeRegUrl = "testUrl"
     }
 

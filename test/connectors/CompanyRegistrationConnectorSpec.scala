@@ -44,7 +44,7 @@ class CompanyRegistrationConnectorSpec extends AnyWordSpec with should.Matchers 
 
   class Setup {
 
-    object TestConnector extends CompanyRegistrationConnector(mockHttp, mockServicesConfig, mockConfiguration) {
+    object TestConnector extends CompanyRegistrationConnector(mockHttp, mockServicesConfig) {
       override lazy val companyRegUrl = "testUrl"
     }
 

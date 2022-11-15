@@ -16,15 +16,16 @@
 
 package audit
 
+import java.time.Instant
+import java.util.UUID
+
+import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-import java.time.Instant
-import java.util.UUID
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuditService @Inject()(auditConnector: AuditConnector) {
