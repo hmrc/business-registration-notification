@@ -20,13 +20,13 @@ import sbt._
 private object AppDependencies {
 
   val playVersion             =  "-play-28"
-  val bootstrapPlay           =  "7.7.0"
+  val bootstrapPlay           =  "7.13.0"
   val domainVersion           = s"8.1.0$playVersion"
   val scalaTestPlusVersion    =  "5.1.0"
-  val flexmarkVersion         =  "0.62.2"
-  val scalatestVersion        =  "3.2.12"
-  val scalatestMockitoVersion =  scalatestVersion + ".0"
-  val wiremockVersion         =  "2.33.2"
+  val flexmarkVersion         =  "0.64.0"
+  val scalatestVersion        =  "3.2.15"
+  val scalatestMockitoVersion =  "3.2.12.0"
+  val wiremockVersion         =  "2.35.0"
 
   val compile = Seq(
     "uk.gov.hmrc"               %% s"bootstrap-backend$playVersion"     % bootstrapPlay,
