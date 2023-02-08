@@ -1,9 +1,9 @@
 
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, integrationTestSettings, scalaSettings}
-import uk.gov.hmrc.SbtBobbyPlugin.BobbyKeys.bobbyRulesURL
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import java.net.URL
+import SbtBobbyPlugin.BobbyKeys.bobbyRulesURL
 
 val appName: String = "business-registration-notification"
 
@@ -19,14 +19,13 @@ lazy val microservice = Project(appName, file("."))
   .settings(scoverageSettings: _*)
   .settings(scalaSettings: _*)
   .settings(PlayKeys.playDefaultPort := 9661)
-  .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings())
   .settings(majorVersion := 1)
   .settings(
     scalacOptions += "-Xlint:-unused",
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.13.8",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     resolvers += Resolver.jcenterRepo,
