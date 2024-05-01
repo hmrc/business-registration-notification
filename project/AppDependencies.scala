@@ -26,7 +26,7 @@ private object AppDependencies {
   val flexmarkVersion         =  "0.64.8"
   val scalatestVersion        =  "3.2.18"
   val scalatestMockitoVersion =  "3.2.12.0"
-  val wiremockVersion         =  "3.0.1"
+  val wiremockVersion         =  "2.35.1"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"               %% s"bootstrap-backend$playVersion"     % bootstrapPlay,
