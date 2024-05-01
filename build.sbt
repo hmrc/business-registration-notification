@@ -2,8 +2,6 @@
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, itSettings, scalaSettings}
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
-import java.net.URL
-import SbtBobbyPlugin.BobbyKeys.bobbyRulesURL
 
 val appName: String = "business-registration-notification"
 
@@ -29,7 +27,6 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged := true,
     resolvers += Resolver.jcenterRepo
   )
-  .settings(bobbyRulesURL := Some(new URL("https://webstore.tax.service.gov.uk/bobby-config/deprecated-dependencies.json")))
 
 lazy val it = project
   .enablePlugins(PlayScala)
@@ -37,4 +34,3 @@ lazy val it = project
   .settings(itSettings())
   .settings(libraryDependencies ++= AppDependencies(),
     addTestReportOption(Test, "int-test-reports"))
-  .settings(javaOptions += "-Dlogger.resource=logback-test.xml")
