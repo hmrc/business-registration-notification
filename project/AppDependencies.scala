@@ -15,32 +15,32 @@
  */
 
 import play.core.PlayVersion
-import sbt._
+import sbt.*
 
 private object AppDependencies {
 
-  val playVersion             =  "-play-28"
-  val bootstrapPlay           =  "7.13.0"
-  val domainVersion           = s"8.1.0$playVersion"
-  val scalaTestPlusVersion    =  "5.1.0"
-  val flexmarkVersion         =  "0.64.0"
-  val scalatestVersion        =  "3.2.15"
+  val playVersion             =  "-play-30"
+  val bootstrapPlay           =  "8.5.0"
+  val domainVersion           =  "9.0.0"
+  val scalaTestPlusVersion    =  "7.0.1"
+  val flexmarkVersion         =  "0.64.8"
+  val scalatestVersion        =  "3.2.18"
   val scalatestMockitoVersion =  "3.2.12.0"
-  val wiremockVersion         =  "2.35.0"
+  val wiremockVersion         =  "3.0.1"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"               %% s"bootstrap-backend$playVersion"     % bootstrapPlay,
-    "uk.gov.hmrc"               %%  "domain"                            % domainVersion
+    "uk.gov.hmrc"               %% s"domain$playVersion"                % domainVersion
   )
 
-  val test = Seq(
-    "uk.gov.hmrc"               %% s"bootstrap-test$playVersion"        % bootstrapPlay               % "test, it",
-    "org.scalatest"             %%  "scalatest"                         % scalatestVersion            % "test, it",
-    "org.scalatestplus.play"    %%  "scalatestplus-play"                % scalaTestPlusVersion        % "test, it",
-    "org.scalatestplus"         %%  "mockito-4-5"                       % scalatestMockitoVersion     % "test, it",
-    "com.vladsch.flexmark"      %   "flexmark-all"                      % flexmarkVersion             % "test, it",
-    "com.typesafe.play"         %%  "play-test"                         % PlayVersion.current         % "test, it",
-    "com.github.tomakehurst"    %   "wiremock-jre8-standalone"          % wiremockVersion             % "it"
+  val test: Seq[ModuleID] = Seq(
+    "uk.gov.hmrc"               %% s"bootstrap-test$playVersion"        % bootstrapPlay               % "test",
+    "org.scalatest"             %%  "scalatest"                         % scalatestVersion            % "test",
+    "org.scalatestplus.play"    %%  "scalatestplus-play"                % scalaTestPlusVersion        % "test",
+    "org.scalatestplus"         %%  "mockito-4-5"                       % scalatestMockitoVersion     % "test",
+    "com.vladsch.flexmark"      %   "flexmark-all"                      % flexmarkVersion             % "test",
+    "org.playframework"         %%  "play-test"                         % PlayVersion.current         % "test",
+    "com.github.tomakehurst"    %   "wiremock-jre8-standalone"          % wiremockVersion             % "test"
   )
 
   def apply(): Seq[ModuleID] = compile ++ test

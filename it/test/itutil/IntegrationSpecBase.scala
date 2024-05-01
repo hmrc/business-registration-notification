@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package itutil
+package test.itutil
 
 import org.scalatest._
 import org.scalatest.matchers.should
