@@ -17,7 +17,7 @@
 package services
 
 import com.codahale.metrics.Counter
-import com.kenshoo.play.metrics.Metrics
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 
 @Singleton

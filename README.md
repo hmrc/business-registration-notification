@@ -1,6 +1,30 @@
 # business-registration-notification.
 
-This is a placeholder README.md for a new repository.
+## Running locally
+
+`sbt run` or `./run.sh` for testing
+
+### Testing
+
+#### [ScalaTest](https://www.scalatest.org/)
+
+run unit test suite with
+
+```bash
+sbt test
+```
+
+run integration test suit execute
+
+```bash
+sbt it/test
+```
+
+#### [Scoverage](https://github.com/scoverage/sbt-scoverage)
+
+```bash
+sbt clean coverage test it/test coverageReport
+```
 
 ### License
 

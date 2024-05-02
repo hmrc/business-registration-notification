@@ -16,12 +16,11 @@
 
 package controllers
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
 import basicauth.{BasicAuthenticatedAction, BasicAuthenticationFilterConfiguration}
 import com.codahale.metrics.Counter
-import com.kenshoo.play.metrics.Metrics
 import models.ETMPNotification
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.matchers.should
@@ -36,6 +35,7 @@ import play.api.test.Helpers._
 import services.MetricsService
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException, ServiceUnavailableException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import util.ServiceDirector
 
 import scala.concurrent.ExecutionContext.Implicits.global

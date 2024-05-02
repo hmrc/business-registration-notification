@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package api
+package test.api
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import itutil.{IntegrationSpecBase, WiremockHelper}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.test.Helpers._
+import test.itutil.{IntegrationSpecBase, WiremockHelper}
 import util.BasicBase64
 
 class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
