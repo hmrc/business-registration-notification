@@ -18,7 +18,6 @@ package audit
 
 import java.time.Instant
 import java.util.UUID
-
 import audit.events.ProcessedNotificationEventDetail
 import models.ETMPNotification
 import org.mockito.ArgumentMatchers
@@ -34,17 +33,17 @@ import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 class AuditServiceSpec extends PlaySpec with MockitoSugar with DefaultAwaitTimeout {
 
   class Setup(otherHcHeaders: Seq[(String, String)] = Seq()) {
 
-    implicit val hc = HeaderCarrier(otherHeaders = otherHcHeaders)
-    implicit val ec = ExecutionContext.global
+    implicit val hc: HeaderCarrier = HeaderCarrier(otherHeaders = otherHcHeaders)
+    implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
-    val mockAuditConnector = mock[AuditConnector]
-    val mockAuditingConfig = mock[AuditingConfig]
+    val mockAuditConnector: AuditConnector = mock[AuditConnector]
+    val mockAuditingConfig: AuditingConfig = mock[AuditingConfig]
 
     val instantNow = Instant.now()
     val appName = "business-registration-notification"

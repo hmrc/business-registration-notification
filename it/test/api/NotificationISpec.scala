@@ -35,7 +35,7 @@ class NotificationISpec extends IntegrationSpecBase with MockitoSugar {
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(additionalConfiguration)
-    .build
+    .build()
 
   def additionalConfiguration = Map(
     "auditing.enabled" -> "true",

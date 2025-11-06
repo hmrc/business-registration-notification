@@ -38,7 +38,7 @@ class PingSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(additionalConfiguration)
-    .build
+    .build()
 
   val additionalConfiguration: Map[String, String] = Map(
     "Test.basicAuthentication.enabled" -> "true",

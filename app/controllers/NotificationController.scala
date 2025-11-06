@@ -90,7 +90,7 @@ class NotificationController @Inject()(val metrics: MetricsService,
     format.format(new Date(Instant.now.toEpochMilli))
   }
 
-  override def withJsonBody[T](f: T => Future[Result])
+  def withJsonBody[T](f: T => Future[Result])
                               (implicit request: Request[JsValue],
                                m: Manifest[T],
                                reads: Reads[T]): Future[Result] =
