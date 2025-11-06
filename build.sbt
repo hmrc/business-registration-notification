@@ -24,8 +24,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     scalacOptions += "-Xlint:-unused",
     libraryDependencies ++= AppDependencies(),
-    retrieveManaged := true,
-    resolvers += Resolver.jcenterRepo
+    retrieveManaged := true
   )
 
 lazy val it = project
