@@ -5,7 +5,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "business-registration-notification"
 
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.17"
 ThisBuild / majorVersion := 1
 
 lazy val scoverageSettings = Seq(
@@ -16,16 +16,15 @@ lazy val scoverageSettings = Seq(
 )
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(PlayScala, SbtDistributablesPlugin): _*)
-  .settings(scoverageSettings: _*)
-  .settings(scalaSettings: _*)
+  .enablePlugins(Seq(PlayScala, SbtDistributablesPlugin) *)
+  .settings(scoverageSettings *)
+  .settings(scalaSettings *)
   .settings(PlayKeys.playDefaultPort := 9661)
-  .settings(defaultSettings(): _*)
+  .settings(defaultSettings() *)
   .settings(
     scalacOptions += "-Xlint:-unused",
     libraryDependencies ++= AppDependencies(),
-    retrieveManaged := true,
-    resolvers += Resolver.jcenterRepo
+    retrieveManaged := true
   )
 
 lazy val it = project
